@@ -24,3 +24,7 @@ logs
 !.env.example
 
 .superpowers
+
+# Local Codex skill caches
+.codex/**/__pycache__/
+.codex/**/*.pyc
