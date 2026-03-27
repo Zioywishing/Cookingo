@@ -3,7 +3,12 @@ import { computed, shallowRef, watch } from "vue";
 
 import { useRecipes } from "../../composables/useRecipes";
 import { useRecipeRuntime } from "../../composables/useRecipeRuntime";
-import { RecipeDifficulty } from "#shared/types/recipe";
+import { RecipeDifficulty, RecipeRuntimeMode } from "#shared/types/recipe";
+import {
+  getRecipeRuntimeModeLabel,
+  getRecipeRuntimeStack,
+  resolveRecipeRuntimeMode,
+} from "../../utils/recipeRuntime";
 
 type IRecipeProcessNode = import("#shared/types/recipe").IRecipeProcessNode;
 type IRecipeSchema = import("#shared/types/recipe").IRecipeSchema;
@@ -20,18 +25,22 @@ const route = useRoute();
 const { getRecipeById, pending } = useRecipes();
 
 const recipe = computed(() => getRecipeById(route.params.id as string));
+const runtimeMode = computed(() =>
+  resolveRecipeRuntimeMode(route.query.mode as string | string[] | undefined),
+);
+const runtimeStack = computed(() =>
+  getRecipeRuntimeStack(recipe.value, runtimeMode.value),
+);
 const runtime = shallowRef<ReturnType<typeof useRecipeRuntime>>();
 
 watch(
-  recipe,
-  (currentRecipe, _previousRecipe, onCleanup) => {
+  runtimeStack,
+  (currentStack, _previousStack, onCleanup) => {
     runtime.value?.dispose?.();
-    const currentRuntime = currentRecipe
-      ? useRecipeRuntime(currentRecipe)
-      : undefined;
+    const currentRuntime = useRecipeRuntime(currentStack);
     runtime.value = currentRuntime;
     onCleanup(() => {
-      currentRuntime?.dispose?.();
+      currentRuntime.dispose?.();
     });
   },
   {
@@ -88,17 +97,15 @@ const totalMinutes = computed(() =>
   recipe.value ? estimateMinutes(recipe.value) : 0,
 );
 
-const activePhaseLabel = computed(() => {
-  switch (runtime.value?.activePhase.value) {
-    case "prepare":
-      return "准备阶段";
-    case "process":
-      return "烹饪阶段";
-    case "finished":
-      return "已完成";
-    default:
-      return "进行中";
+const runtimeModeLabel = computed(() => {
+  if (!recipe.value) {
+    return "进行中";
   }
+
+  return getRecipeRuntimeModeLabel(
+    runtimeMode.value,
+    runtime.value?.hasFinished.value ?? false,
+  );
 });
 
 const transitionName = computed(() => {
@@ -115,7 +122,6 @@ const transitionKey = computed(() => {
   }
 
   return [
-    runtime.value.activePhase.value,
     runtime.value.currentStep.value?.id ?? "resting",
     runtime.value.lastTransition.value,
     runtime.value.transitionKey.value,
@@ -126,11 +132,11 @@ const transitionKey = computed(() => {
 useSeoMeta({
   title: () =>
     recipe.value
-      ? `开始做菜：${recipe.value.meta.name} | Cookingo`
+      ? `${runtimeMode.value === RecipeRuntimeMode.Prepare ? "开始准备" : "开始做菜"}：${recipe.value.meta.name} | Cookingo`
       : "开始做菜 | Cookingo",
   description: () =>
     recipe.value
-      ? `单卡片 cooking runtime：${recipe.value.meta.name}`
+      ? `${runtimeModeLabel.value}：${recipe.value.meta.name}`
       : "单卡片 cooking runtime",
 });
 </script>
@@ -157,7 +163,7 @@ useSeoMeta({
           </p>
 
           <div class="cook-page__meta">
-            <span>{{ activePhaseLabel }}</span>
+            <span>{{ runtimeModeLabel }}</span>
             <span>{{ difficultyText }}</span>
             <span>预计 {{ totalMinutes }} 分钟</span>
             <span>{{ recipe.meta.ingredients.length }} 种食材</span>

@@ -11,6 +11,15 @@ export enum RecipeDifficulty {
 }
 
 /**
+ * 菜谱 runtime 的入口模式。
+ * prepare 表示进入准备工作栈，process 表示进入正式烹饪栈。
+ */
+export enum RecipeRuntimeMode {
+  Prepare = "prepare",
+  Process = "process",
+}
+
+/**
  * 菜谱元信息中的食材摘要，便于开做前快速总览。
  */
 export interface IRecipeIngredientMeta extends IRecipeIngredient {
