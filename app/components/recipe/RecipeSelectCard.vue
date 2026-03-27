@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-import { RecipeDifficulty } from "#shared/types/recipe";
+import { RecipeDifficulty, RecipeRuntimeMode } from "#shared/types/recipe";
 import type { IRecipeSchema } from "#shared/types/recipe";
 
 const props = defineProps<{
@@ -20,18 +20,24 @@ const difficultyText = computed(() => {
       return "难度未标注";
   }
 });
+
+const prepareEntry = computed(() => ({
+  path: `/cook/${props.recipe.meta.id}`,
+  query: {
+    mode: RecipeRuntimeMode.Prepare,
+  },
+}));
+
+const processEntry = computed(() => ({
+  path: `/cook/${props.recipe.meta.id}`,
+  query: {
+    mode: RecipeRuntimeMode.Process,
+  },
+}));
 </script>
 
 <template>
   <article class="recipe-select-card">
-    <div class="recipe-select-card__visual">
-      <img
-        :src="recipe.meta.coverImageUrl"
-        :alt="recipe.meta.name"
-        class="recipe-select-card__image"
-      >
-    </div>
-
     <div class="recipe-select-card__body">
       <div class="recipe-select-card__eyebrow">
         <span>{{ difficultyText }}</span>
@@ -58,12 +64,21 @@ const difficultyText = computed(() => {
           <span>{{ recipe.meta.equipment?.length ?? 0 }} 个厨具</span>
         </div>
 
-        <NuxtLink
-          :to="`/cook/${recipe.meta.id}`"
-          class="recipe-select-card__cta"
-        >
-          开始准备
-        </NuxtLink>
+        <div class="recipe-select-card__actions">
+          <NuxtLink
+            :to="prepareEntry"
+            class="recipe-select-card__cta recipe-select-card__cta--secondary"
+          >
+            开始准备
+          </NuxtLink>
+
+          <NuxtLink
+            :to="processEntry"
+            class="recipe-select-card__cta"
+          >
+            开始做菜
+          </NuxtLink>
+        </div>
       </div>
     </div>
   </article>
@@ -79,19 +94,6 @@ const difficultyText = computed(() => {
     linear-gradient(145deg, rgba(255, 252, 247, 0.96), rgba(255, 243, 226, 0.96));
   border: 1px solid rgba(145, 84, 34, 0.12);
   box-shadow: 0 1.2rem 2.8rem rgba(80, 41, 15, 0.08);
-}
-
-.recipe-select-card__visual {
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  border-radius: 1.25rem;
-}
-
-.recipe-select-card__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 .recipe-select-card__body {
@@ -144,6 +146,13 @@ const difficultyText = computed(() => {
   gap: 0.75rem;
 }
 
+.recipe-select-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
 .recipe-select-card__cta {
   display: inline-flex;
   align-items: center;
@@ -158,15 +167,15 @@ const difficultyText = computed(() => {
   box-shadow: 0 0.8rem 1.8rem rgba(188, 76, 21, 0.22);
 }
 
+.recipe-select-card__cta--secondary {
+  background: rgba(255, 244, 232, 0.92);
+  color: #a1541f;
+  box-shadow: none;
+}
+
 @media (min-width: 800px) {
   .recipe-select-card {
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-    align-items: stretch;
-  }
-
-  .recipe-select-card__visual {
-    aspect-ratio: auto;
-    min-height: 100%;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

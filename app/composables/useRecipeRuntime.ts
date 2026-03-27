@@ -1,14 +1,12 @@
 import { computed, onScopeDispose, ref } from "vue";
 
-import type { IRecipeProcessNode, IRecipeSchema } from "#shared/types/recipe";
+import type { IRecipeProcessNode, IRecipeProcessStack } from "#shared/types/recipe";
 
 type RuntimeTransition =
   | "idle"
   | "advance"
   | "async-start"
   | "async-ready";
-
-type RuntimePhase = "prepare" | "process" | "finished";
 
 interface RuntimeOptions {
   now?: () => number;
@@ -48,23 +46,15 @@ function formatTaskTitle(node: IRecipeProcessNode) {
 }
 
 export function createRecipeRuntime(
-  recipe: IRecipeSchema,
+  initialStack: IRecipeProcessStack,
   options: RuntimeOptions = {},
 ) {
   const now = options.now ?? (() => Date.now());
   const nodeRegistry = new Map<number, IRecipeProcessNode>();
 
-  collectNodes(recipe.prepare, nodeRegistry);
-  collectNodes(recipe.process, nodeRegistry);
+  collectNodes(initialStack, nodeRegistry);
 
-  const initialPhase: RuntimePhase = recipe.prepare?.length
-    ? "prepare"
-    : recipe.process.length
-      ? "process"
-      : "finished";
-
-  const activePhase = ref<RuntimePhase>(initialPhase);
-  const stack = ref<number[]>(getPhaseHeadIds(initialPhase));
+  const stack = ref<number[]>(initialStack.map((node) => node.id));
   const completedStepIds = ref<number[]>([]);
   const deferredNodes = ref<DeferredRuntimeNode[]>([]);
   const asyncTasks = ref<RuntimeAsyncTask[]>([]);
@@ -73,19 +63,6 @@ export function createRecipeRuntime(
   const completedSet = computed(() => new Set(completedStepIds.value));
 
   let timer: number | undefined;
-
-  function getPhaseHeadIds(phase: RuntimePhase) {
-    if (phase === "prepare") {
-      return (recipe.prepare ?? []).map((node) => node.id);
-    }
-
-    if (phase === "process") {
-      return recipe.process.map((node) => node.id);
-    }
-
-    return [];
-  }
-
   function resolveNode(nodeId?: number) {
     return typeof nodeId === "number" ? nodeRegistry.get(nodeId) : undefined;
   }
@@ -168,36 +145,10 @@ export function createRecipeRuntime(
     return true;
   }
 
-  function advancePhaseIfIdle() {
-    if (stack.value.length || deferredNodes.value.length || asyncTasks.value.length) {
-      return false;
-    }
-
-    if (activePhase.value === "prepare") {
-      if (recipe.process.length) {
-        activePhase.value = "process";
-        stack.value = getPhaseHeadIds("process");
-        pushTransition("advance");
-        return true;
-      }
-
-      activePhase.value = "finished";
-      return true;
-    }
-
-    if (activePhase.value === "process") {
-      activePhase.value = "finished";
-      return true;
-    }
-
-    return false;
-  }
-
   const currentStep = computed(() => resolveNode(stack.value[0]));
   const isCurrentStepBlocked = computed(() => !canRunNode(currentStep.value));
   const hasFinished = computed(
     () =>
-      activePhase.value === "finished" &&
       !stack.value.length &&
       !asyncTasks.value.length &&
       !deferredNodes.value.length,
@@ -240,7 +191,6 @@ export function createRecipeRuntime(
     }
 
     const releasedDeferredNodes = releaseDeferredNodes();
-    advancePhaseIfIdle();
 
     if (!didQueueNext && !releasedDeferredNodes && currentStep.value) {
       pushTransition("advance");
@@ -267,7 +217,6 @@ export function createRecipeRuntime(
     });
 
     releaseDeferredNodes();
-    advancePhaseIfIdle();
   }
 
   function dispose() {
@@ -288,7 +237,6 @@ export function createRecipeRuntime(
   }
 
   return {
-    activePhase,
     stack,
     currentStep,
     completedStepIds,
@@ -304,6 +252,6 @@ export function createRecipeRuntime(
   };
 }
 
-export function useRecipeRuntime(recipe: IRecipeSchema) {
-  return createRecipeRuntime(recipe);
+export function useRecipeRuntime(stack: IRecipeProcessStack) {
+  return createRecipeRuntime(stack);
 }
