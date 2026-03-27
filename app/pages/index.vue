@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useRecipes } from "../composables/useRecipes";
+import { useHomepageTheme } from "../composables/useHomepageTheme";
 
 defineOptions({
-  name: "RecipesPage",
+  name: "HomepageEntryPage",
 });
 
 definePageMeta({
@@ -10,84 +10,139 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: "选菜谱 | Cookingo",
-  description: "先选今天想做的菜，再进入单卡片 cooking runtime。",
+  title: "Cookingo",
+  description: "一个安静的做饭入口。先进入，再选今天要做的菜。",
 });
 
-const { recipes } = useRecipes();
+const { themeState, heroStyle } = useHomepageTheme();
 </script>
 
 <template>
-  <main class="recipes-page">
-    <section class="recipes-page__hero">
-      <p>Cookingo</p>
-      <h1>先选一道今天真想做完的菜</h1>
-      <p class="recipes-page__description">
-        这版先用接口菜谱把“选菜谱 → 开始做菜”的完整链路跑通。进入后会看到单卡片流程和异步计时器。
-      </p>
-    </section>
+  <main
+    class="homepage-entry"
+    :style="heroStyle"
+  >
+    <div class="homepage-entry__frame">
+      <header class="homepage-entry__header">
+        <p>Cookingo</p>
+        <span>{{ themeState.timeRange }}</span>
+      </header>
 
-    <section class="recipes-page__list">
-      <RecipeSelectCard
-        v-for="recipe in recipes"
-        :key="recipe.meta.id"
-        :recipe="recipe"
-      />
-    </section>
+      <section class="homepage-entry__hero">
+        <p class="homepage-entry__segment">{{ themeState.label }}</p>
+        <h1>{{ themeState.headline }}</h1>
+        <NuxtLink
+          to="/recipes"
+          class="homepage-entry__cta"
+        >
+          开始选菜
+        </NuxtLink>
+      </section>
+    </div>
   </main>
 </template>
 
 <style scoped>
-.recipes-page {
-  min-height: 100vh;
-  padding: 1.25rem 1rem 2.5rem;
-  background:
-    radial-gradient(circle at top, rgba(255, 200, 120, 0.28), transparent 24%),
-    linear-gradient(180deg, #fffaf4 0%, #fff1e1 45%, #fff7ee 100%);
+.homepage-entry {
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  box-sizing: border-box;
+  background: var(--homepage-background);
+  color: var(--homepage-text);
+  overflow: hidden;
 }
 
-.recipes-page__hero {
-  width: min(100%, 46rem);
-  margin: 0 auto 1.5rem;
+.homepage-entry__frame {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding:
+    max(1rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+  box-sizing: border-box;
 }
 
-.recipes-page__hero > p:first-child {
-  margin: 0;
-  color: #bc5a1f;
-  font-size: 0.85rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.recipes-page__hero h1 {
-  margin: 0.55rem 0 0;
-  color: #3f220e;
-  font-size: clamp(2.3rem, 10vw, 4.7rem);
-  line-height: 0.95;
-}
-
-.recipes-page__description {
-  margin: 1rem 0 0;
-  max-width: 38rem;
-  color: #70492a;
-  line-height: 1.75;
-  font-size: 1rem;
-}
-
-.recipes-page__list {
-  display: grid;
+.homepage-entry__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 1rem;
-  width: min(100%, 72rem);
-  margin: 0 auto;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--homepage-accent);
 }
 
-@media (min-width: 1024px) {
-  .recipes-page {
-    padding: 2rem 1.5rem 3rem;
+.homepage-entry__header p,
+.homepage-entry__header span,
+.homepage-entry__segment {
+  margin: 0;
+}
+
+.homepage-entry__hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.homepage-entry__segment {
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--homepage-accent);
+}
+
+.homepage-entry__hero h1 {
+  margin: 1.2rem 0 0;
+  max-width: 6em;
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: clamp(3.6rem, 13vw, 5.8rem);
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+  font-weight: 600;
+}
+
+.homepage-entry__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.8rem;
+  padding: 0.95rem 1.4rem;
+  border-radius: 999px;
+  background: var(--homepage-button);
+  color: var(--homepage-button-text);
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: var(--homepage-shadow);
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    opacity 200ms ease;
+}
+
+.homepage-entry__cta:hover,
+.homepage-entry__cta:focus-visible {
+  opacity: 0.92;
+}
+
+.homepage-entry__cta:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+@media (min-width: 768px) {
+  .homepage-entry__frame {
+    padding: 2rem;
   }
 
-  .recipes-page__list {
-    gap: 1.35rem;
+  .homepage-entry__hero h1 {
+    max-width: 7em;
   }
 }
 </style>
