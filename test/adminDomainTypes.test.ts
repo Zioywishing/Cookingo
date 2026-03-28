@@ -1,31 +1,31 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-
-const projectRoot = resolve(import.meta.dir, "..");
-
-function readProjectFile(relativePath: string) {
-  return readFileSync(resolve(projectRoot, relativePath), "utf8");
-}
+import {
+  AdminPermissionCode,
+  AdminUserStatus,
+} from "../shared/types/admin";
+import * as AdminErrorCodes from "../server/utils/admin/error-codes";
+import { ADMIN_PERMISSION_SEED } from "../server/utils/admin/permissions";
 
 describe("admin domain types", () => {
-  test("exports admin status and permission codes from shared types", () => {
-    const sharedAdmin = readProjectFile("shared/types/admin.ts");
-    const sharedIndex = readProjectFile("shared/types/index.ts");
+  test("exports the canonical admin statuses and permission codes", () => {
+    expect(AdminUserStatus.Active).toBe("active");
+    expect(AdminUserStatus.Disabled).toBe("disabled");
 
-    expect(sharedAdmin).toContain("AdminUserStatus");
-    expect(sharedAdmin).toContain("AdminPermissionCode");
-    expect(sharedIndex).toContain('export * from "./admin"');
+    expect(AdminPermissionCode.Dashboard).toBe("admin.dashboard");
+    expect(AdminPermissionCode.Users).toBe("admin.users");
+    expect(AdminPermissionCode.Roles).toBe("admin.roles");
+    expect(AdminPermissionCode.LoginLogs).toBe("admin.login-logs");
+    expect(AdminPermissionCode.AuditLogs).toBe("admin.audit-logs");
   });
 
-  test("centralizes admin error codes and permission seeds", () => {
-    const errorCodes = readProjectFile("server/utils/admin/error-codes.ts");
-    const permissions = readProjectFile("server/utils/admin/permissions.ts");
+  test("centralizes the admin error codes and permissions seed", () => {
+    expect(AdminErrorCodes.ADMIN_AUTH_INVALID).toBe(40101);
+    expect(AdminErrorCodes.ADMIN_USER_DUPLICATE_USERNAME).toBe(40902);
 
-    expect(errorCodes).toContain("ADMIN_AUTH_INVALID");
-    expect(errorCodes).toContain("ADMIN_USER_DUPLICATE_USERNAME");
-    expect(permissions).toContain("admin.dashboard");
-    expect(permissions).toContain("admin.users");
-    expect(permissions).toContain("admin.roles");
+    expect(ADMIN_PERMISSION_SEED).toHaveLength(5);
+    const canonicalCodes = new Set(Object.values(AdminPermissionCode));
+    for (const seed of ADMIN_PERMISSION_SEED) {
+      expect(canonicalCodes.has(seed.code)).toBe(true);
+    }
   });
 });
