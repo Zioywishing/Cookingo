@@ -48,6 +48,19 @@ server/api/
       createRecipe.ts
 ```
 
+## API 命名与分页协议约定
+
+- 后端 API 文件名采用动作风格命名，保持语义明确且简短
+- 仅允许放在 `server/api/admin/<method>/*`，不要在其他目录定义后台接口
+- 所有分页接口必须统一使用 `page`、`pageSize` 作为请求参数
+- 所有分页接口必须统一返回 `data: { items, total, page, pageSize }`
+- 不允许同项目内混用 `list/items/records` 等不同字段名
+
+执行要求：
+
+- 用户列表、角色列表、登录日志、审计日志以及后续新增分页接口都必须遵守统一分页协议
+- 若历史接口与此协议不一致，改造时优先对齐此协议
+
 ## 服务端职责分层约定
 
 - 后端实现必须优先按职责拆分，不要把 API 文件直接写成“读参数 + 查库 + 业务判断 + 日志审计”混合体
@@ -76,7 +89,8 @@ server/api/
 ## SQLite / Cloudflare D1 兼容约束
 
 - 当前项目后端若采用 SQLite 落地，必须默认以“未来可能迁移到 Cloudflare D1”为兼容前提
-- 第一版可以先运行在本地 Node + SQLite，但实现上必须规避 D1 不友好的能力
+- 当前项目第一版运行时基线为 Bun + SQLite（`bun:sqlite`），不保证 Node 兼容
+- 实现上必须规避 D1 不友好的能力
 
 执行要求：
 
@@ -88,6 +102,17 @@ server/api/
 - 初始化与 seed 逻辑由应用层实现，不要依赖数据库脚本系统
 - 表结构演进必须通过正式 migration 管理，不要以运行时代码自动建表替代 migration
 
+## 时间字段写入约定
+
+- 后端时间字段统一由应用层写入 UTC ISO 字符串
+- 推荐格式：`YYYY-MM-DDTHH:mm:ss.sssZ`（例如 `2026-03-29T08:30:00.000Z`）
+- 不要混用本地时间字符串、秒级时间戳和毫秒时间戳
+
+执行要求：
+
+- `created_at`、`updated_at`、`last_login_at`、`password_changed_at` 等时间字段遵循统一格式
+- 查询与排序逻辑应基于统一格式实现，避免时区歧义
+
 ## 错误码约定
 
 - `code: 0` 表示请求成功
@@ -96,6 +121,8 @@ server/api/
 - 同一类错误必须复用同一个错误码，不要在不同接口中随意定义
 - `msg` 用于提供给前端和日志查看的可读错误说明
 - `data` 在失败场景下默认返回 `null`，除非该错误明确需要附带额外信息
+- admin 域错误码常量统一定义在 `server/utils/admin/error-codes.ts`
+- handler、service、repository 中禁止写错误码数字字面量（魔法数字）
 
 当前基础错误码分层如下：
 
