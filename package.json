@@ -6,7 +6,9 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
+    "lint": "bunx eslint .",
     "preview": "nuxt preview",
+    "typecheck": "bunx tsc --noEmit",
     "test": "bun test",
     "postinstall": "nuxt prepare"
   },
