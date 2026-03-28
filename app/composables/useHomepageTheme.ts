@@ -1,5 +1,10 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
+import {
+  EAST_8_TIMEZONE_OFFSET_HOURS,
+  getDateInFixedTimezone,
+} from "../utils/timezone";
+
 export enum HomepageSegment {
   Midnight = "midnight",
   Morning = "morning",
@@ -190,15 +195,17 @@ export function resolveHomepageSegment(hour: number) {
 }
 
 export function getCopyIndexForHour(date: Date) {
+  const timezoneDate = getDateInFixedTimezone(date, EAST_8_TIMEZONE_OFFSET_HOURS);
   const seed = Number(
-    `${date.getFullYear()}${date.getMonth() + 1}${date.getDate()}${date.getHours()}`,
+    `${timezoneDate.getUTCFullYear()}${timezoneDate.getUTCMonth() + 1}${timezoneDate.getUTCDate()}${timezoneDate.getUTCHours()}`,
   );
 
   return Math.abs(seed * 17 + 11) % 3;
 }
 
 export function getHomepageThemeState(date: Date): IHomepageThemeState {
-  const segment = resolveHomepageSegment(date.getHours());
+  const timezoneDate = getDateInFixedTimezone(date, EAST_8_TIMEZONE_OFFSET_HOURS);
+  const segment = resolveHomepageSegment(timezoneDate.getUTCHours());
   const definition = HOMEPAGE_THEME_MAP[segment];
   const copyIndex = getCopyIndexForHour(date);
 
@@ -211,8 +218,11 @@ export function getHomepageThemeState(date: Date): IHomepageThemeState {
 }
 
 export function useHomepageTheme() {
+  const initialTimestamp = useState("homepage-theme-initial-timestamp", () =>
+    Date.now(),
+  );
   const themeState = ref<IHomepageThemeState>(
-    getHomepageThemeState(new Date("2026-03-27T18:00:00.000Z")),
+    getHomepageThemeState(new Date(initialTimestamp.value)),
   );
   let timer: ReturnType<typeof setInterval> | null = null;
 
