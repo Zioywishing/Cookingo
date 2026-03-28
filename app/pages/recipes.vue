@@ -5,10 +5,6 @@ defineOptions({
   name: "RecipesPage",
 });
 
-definePageMeta({
-  layout: false,
-});
-
 useSeoMeta({
   title: "选菜谱 | Cookingo",
   description: "选择今天想做的菜，再进入单卡片 cooking runtime。",

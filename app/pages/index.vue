@@ -5,10 +5,6 @@ defineOptions({
   name: "HomepageEntryPage",
 });
 
-definePageMeta({
-  layout: false,
-});
-
 useSeoMeta({
   title: "Cookingo",
   description: "一个安静的做饭入口。先进入，再选今天要做的菜。",

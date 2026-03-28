@@ -17,10 +17,6 @@ defineOptions({
   name: "CookRecipePage",
 });
 
-definePageMeta({
-  layout: false,
-});
-
 const route = useRoute();
 const { getRecipeById, pending } = useRecipes();
 
