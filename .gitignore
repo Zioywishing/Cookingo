@@ -24,6 +24,7 @@ logs
 !.env.example
 
 .superpowers
+.worktrees
 
 # Local Codex skill caches
 .codex/**/__pycache__/
