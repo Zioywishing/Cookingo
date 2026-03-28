@@ -48,6 +48,46 @@ server/api/
       createRecipe.ts
 ```
 
+## 服务端职责分层约定
+
+- 后端实现必须优先按职责拆分，不要把 API 文件直接写成“读参数 + 查库 + 业务判断 + 日志审计”混合体
+- API handler、repository、service、auth utility、admin utility 的职责边界必须清晰
+- 若当前任务涉及后端结构设计或新增后端能力，优先复用以下语义目录，不要临时发明新的平级层级
+
+目录语义如下：
+
+- `server/api/admin/*`：接口入口层，只负责参数读取、调用鉴权、调用 service、返回统一响应
+- `server/db/*`：数据库初始化、schema 聚合、migration/seed 支撑
+- `server/repositories/admin/*`：数据访问层，只负责数据库读写与查询封装
+- `server/services/admin/*`：业务规则层，负责状态变更、业务编排、审计和日志写入时机
+- `server/utils/auth/*`：JWT、Cookie、当前用户恢复、通用鉴权辅助
+- `server/utils/admin/*`：admin 域错误码、密码规则、admin 域通用帮助函数
+
+执行要求：
+
+- API handler 不要直接承载复杂业务规则
+- API handler 不要直接编写复杂数据库查询
+- repository 不要处理 HTTP 语义
+- repository 不要直接承担权限判断
+- service 不要直接依赖请求对象
+- 登录日志应在认证相关 service 中写入
+- 操作审计应在真正执行状态变更的 service 中写入
+
+## SQLite / Cloudflare D1 兼容约束
+
+- 当前项目后端若采用 SQLite 落地，必须默认以“未来可能迁移到 Cloudflare D1”为兼容前提
+- 第一版可以先运行在本地 Node + SQLite，但实现上必须规避 D1 不友好的能力
+
+执行要求：
+
+- 不要依赖存储过程、触发器、视图承载核心业务逻辑
+- 不要依赖复杂事务嵌套或长事务
+- 不要依赖 SQLite 私有扩展能力
+- 不要依赖未来迁移到 D1 时难兼容的高级 SQL 特性
+- 业务约束优先通过应用层逻辑、显式唯一约束和普通索引实现
+- 初始化与 seed 逻辑由应用层实现，不要依赖数据库脚本系统
+- 表结构演进必须通过正式 migration 管理，不要以运行时代码自动建表替代 migration
+
 ## 错误码约定
 
 - `code: 0` 表示请求成功
