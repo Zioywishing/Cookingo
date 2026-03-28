@@ -13,6 +13,8 @@ Starts a tmux session with:
   - window 1: bun dev
   - window 2: codex or claude
 
+Interactive codex selection also prompts for yolo mode and defaults to enabled.
+
 If no argument is provided, the script prompts for a choice and defaults to codex.
 EOF
 }
@@ -27,10 +29,12 @@ require_command() {
 }
 
 show_arrow_menu() {
-  local options=("codex" "claude")
+  local title="$1"
+  shift
+  local options=("$@")
   local selected=0
   local key=""
-  local menu_lines=4
+  local menu_lines=$((${#options[@]} + 2))
   local first_render=1
   local i
 
@@ -39,7 +43,7 @@ show_arrow_menu() {
       printf '\033[%sF' "$menu_lines" >&2
     fi
 
-    printf 'Select AI assistant\n' >&2
+    printf '%s\n' "$title" >&2
     for i in "${!options[@]}"; do
       if [[ "$i" -eq "$selected" ]]; then
         printf ' > %s\n' "${options[$i]}" >&2
@@ -80,12 +84,12 @@ show_arrow_menu() {
   done
 }
 
-resolve_assistant() {
+resolve_assistant_choice() {
   local choice="${1:-}"
 
   if [[ -z "$choice" ]]; then
     if [[ -t 0 ]]; then
-      choice="$(show_arrow_menu)"
+      choice="$(show_arrow_menu "Select AI assistant" "codex" "claude")"
     fi
     choice="${choice:-codex}"
   fi
@@ -106,16 +110,56 @@ resolve_assistant() {
   esac
 }
 
+resolve_codex_command() {
+  local mode="${1:-}"
+
+  if [[ "$mode" != "interactive" ]]; then
+    printf 'codex\n'
+    return 0
+  fi
+
+  local yolo_choice
+  yolo_choice="$(show_arrow_menu "Enable yolo mode for codex?" "yes" "no")"
+
+  if [[ "$yolo_choice" == "yes" ]]; then
+    printf 'codex --yolo\n'
+  else
+    printf 'codex\n'
+  fi
+}
+
+resolve_assistant_command() {
+  local requested_choice="${1:-}"
+  local interaction_mode="non-interactive"
+
+  if [[ -z "$requested_choice" && -t 0 ]]; then
+    interaction_mode="interactive"
+  fi
+
+  local assistant_choice
+  assistant_choice="$(resolve_assistant_choice "$requested_choice")"
+
+  case "$assistant_choice" in
+    codex)
+      resolve_codex_command "$interaction_mode"
+      ;;
+    claude)
+      printf 'claude\n'
+      ;;
+  esac
+}
+
 require_command tmux
 
 if tmux has-session -t "$session_name" 2>/dev/null; then
   exec tmux attach-session -t "$session_name"
 fi
 
-assistant_cmd="$(resolve_assistant "${1:-}")"
+assistant_cmd="$(resolve_assistant_command "${1:-}")"
+assistant_bin="${assistant_cmd%% *}"
 
 require_command bun
-require_command "$assistant_cmd"
+require_command "$assistant_bin"
 
 tmux new-session -d -s "$session_name" -c "$project_dir" -n dev "bun dev"
 tmux new-window -t "$session_name:" -c "$project_dir" -n ai "$assistant_cmd"
