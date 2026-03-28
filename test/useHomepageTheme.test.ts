@@ -6,6 +6,7 @@ import {
   getHomepageThemeState,
   resolveHomepageSegment,
 } from "../app/composables/useHomepageTheme";
+import { EAST_8_TIMEZONE_OFFSET_HOURS } from "../app/utils/timezone";
 
 describe("useHomepageTheme helpers", () => {
   test("resolves the 7 homepage time segments by hour", () => {
@@ -34,7 +35,7 @@ describe("useHomepageTheme helpers", () => {
   });
 
   test("builds the dusk homepage state with time-linked copy and theme colors", () => {
-    const state = getHomepageThemeState(new Date("2026-03-27T18:00:00.000Z"));
+    const state = getHomepageThemeState(new Date("2026-03-27T09:00:00.000Z"));
 
     expect(state.segment).toBe(HomepageSegment.Dusk);
     expect(state.label).toBe("傍晚");
@@ -44,5 +45,14 @@ describe("useHomepageTheme helpers", () => {
     expect(state.palette.background).toContain("#efd5ca");
     expect(state.palette.button).toBe("#844637");
     expect(state.palette.text).toBe("#332419");
+  });
+
+  test("uses fixed east-8 timezone instead of the runtime local timezone", () => {
+    const state = getHomepageThemeState(new Date("2026-03-27T18:00:00.000Z"));
+
+    expect(EAST_8_TIMEZONE_OFFSET_HOURS).toBe(8);
+    expect(state.segment).toBe(HomepageSegment.Midnight);
+    expect(state.label).toBe("凌晨");
+    expect(state.timeRange).toBe("00:00 - 04:59");
   });
 });
