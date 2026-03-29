@@ -21,13 +21,15 @@ definePageMeta({
 const rolesApi = useAdminRoles()
 const createOpen = ref(false)
 const createPending = ref(false)
+const page = ref(1)
+const pageSize = ref(20)
 
 const {
   data: pageData,
   pending,
   refresh,
 } = await useAsyncData("admin-roles-page", () =>
-  feedback.load(() => rolesApi.listRoles(), {
+  feedback.load(() => rolesApi.listRoles(page.value, pageSize.value), {
     errorMessage: "加载角色列表失败",
     fallback: emptyRolesPage,
   }),
@@ -38,6 +40,25 @@ const { data: rolePermissions } = await useAsyncData("admin-role-permissions", (
     fallback: [],
   }),
 )
+
+async function handlePageChange(nextPage: number) {
+  if (nextPage === page.value) {
+    return
+  }
+
+  page.value = nextPage
+  await refresh()
+}
+
+async function handlePageSizeChange(nextPageSize: number) {
+  if (nextPageSize === pageSize.value) {
+    return
+  }
+
+  pageSize.value = nextPageSize
+  page.value = 1
+  await refresh()
+}
 
 async function handleCreateRole(payload: {
   name: string
@@ -70,6 +91,12 @@ async function handleDeleteRole(id: string) {
     return
   }
 
+  const currentItems = pageData.value?.items || []
+
+  if (currentItems.length <= 1 && page.value > 1) {
+    page.value -= 1
+  }
+
   await refresh()
 }
 </script>
@@ -84,7 +111,16 @@ async function handleDeleteRole(id: string) {
       </AdminBaseAdminButton>
     </AdminBaseAdminToolbar>
 
-    <AdminRoleTable :items="pageData?.items || []" :pending="pending" @delete="handleDeleteRole" />
+    <AdminRoleTable
+      :items="pageData?.items || []"
+      :page="page"
+      :page-size="pageSize"
+      :total="pageData?.total || 0"
+      :pending="pending"
+      @delete="handleDeleteRole"
+      @update:page="handlePageChange"
+      @update:pageSize="handlePageSizeChange"
+    />
 
     <AdminRoleCreateDialog
       :open="createOpen"

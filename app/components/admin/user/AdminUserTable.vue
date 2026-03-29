@@ -4,7 +4,15 @@ import { resolveAdminBadgeTone } from "~/composables/useAdminUi"
 
 defineProps<{
   items: AdminUserListItem[]
+  page: number
+  pageSize: number
+  total: number
   pending?: boolean
+}>()
+
+const emit = defineEmits<{
+  "update:page": [page: number]
+  "update:pageSize": [pageSize: number]
 }>()
 </script>
 
@@ -43,6 +51,17 @@ defineProps<{
         </NuxtLink>
       </td>
     </tr>
+
+    <template #footer>
+      <AdminBaseAdminPagination
+        :page="page"
+        :page-size="pageSize"
+        :total="total"
+        :pending="pending"
+        @update:page="emit('update:page', $event)"
+        @update:pageSize="emit('update:pageSize', $event)"
+      />
+    </template>
   </AdminBaseAdminTable>
 </template>
 

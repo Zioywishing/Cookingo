@@ -5,6 +5,11 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
   modules: ["@nuxt/eslint"],
+  routeRules: {
+    "/admin/**": {
+      ssr: false,
+    },
+  },
   runtimeConfig: {
     adminJwtSecret: resolveRuntimeEnv("NUXT_ADMIN_JWT_SECRET"),
     adminJwtCookieName: resolveRuntimeEnv("NUXT_ADMIN_JWT_COOKIE_NAME", {

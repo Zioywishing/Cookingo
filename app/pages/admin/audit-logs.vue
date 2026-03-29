@@ -9,6 +9,8 @@ const emptyPageData = {
   page: 1,
   pageSize: 20,
 }
+const page = ref(1)
+const pageSize = ref(20)
 
 definePageMeta({
   layout: "admin",
@@ -19,17 +21,44 @@ definePageMeta({
 })
 
 const logsApi = useAdminLogs()
-const { data: pageData, pending } = await useAsyncData("admin-audit-logs-page", () =>
-  feedback.load(() => logsApi.listAuditLogs(), {
+const { data: pageData, pending, refresh } = await useAsyncData("admin-audit-logs-page", () =>
+  feedback.load(() => logsApi.listAuditLogs(page.value, pageSize.value), {
     errorMessage: "加载操作审计失败",
     fallback: emptyPageData,
   }),
 )
+
+async function handlePageChange(nextPage: number) {
+  if (nextPage === page.value) {
+    return
+  }
+
+  page.value = nextPage
+  await refresh()
+}
+
+async function handlePageSizeChange(nextPageSize: number) {
+  if (nextPageSize === pageSize.value) {
+    return
+  }
+
+  pageSize.value = nextPageSize
+  page.value = 1
+  await refresh()
+}
 </script>
 
 <template>
   <AdminShellAdminPageContainer>
     <AdminShellAdminPageHeader title="操作审计" description="查看后台关键行为审计记录。" />
-    <AdminLogAdminAuditLogTable :items="pageData?.items || []" :pending="pending" />
+    <AdminLogAdminAuditLogTable
+      :items="pageData?.items || []"
+      :page="page"
+      :page-size="pageSize"
+      :total="pageData?.total || 0"
+      :pending="pending"
+      @update:page="handlePageChange"
+      @update:pageSize="handlePageSizeChange"
+    />
   </AdminShellAdminPageContainer>
 </template>

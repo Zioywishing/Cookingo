@@ -26,6 +26,7 @@ describe("admin foundation configuration", () => {
   test("declares runtime config and sqlite env examples", () => {
     const nuxtConfig = readProjectFile("nuxt.config.ts");
     const envExample = readProjectFile(".env.example");
+    const tsconfig = readProjectFile("tsconfig.json");
 
     expect(nuxtConfig).toContain("runtimeConfig");
     expect(nuxtConfig).toContain("adminJwtSecret");
@@ -38,6 +39,15 @@ describe("admin foundation configuration", () => {
     expect(envExample).toContain("NUXT_ADMIN_JWT_TTL_DAYS=");
     expect(envExample).toContain("NUXT_ADMIN_JWT_RENEW_BEFORE_DAYS=");
     expect(envExample).toContain("NUXT_SQLITE_FILE_PATH=");
+    expect(tsconfig).toContain('"ignoreDeprecations": "6.0"');
+  });
+
+  test("disables SSR for the admin route tree", () => {
+    const nuxtConfig = readProjectFile("nuxt.config.ts");
+
+    expect(nuxtConfig).toContain("routeRules");
+    expect(nuxtConfig).toContain('"/admin/**"');
+    expect(nuxtConfig).toContain("ssr: false");
   });
 
   test("declares drizzle config for sqlite migrations", () => {

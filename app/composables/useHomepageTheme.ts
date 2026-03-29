@@ -16,12 +16,16 @@ export enum HomepageSegment {
 }
 
 interface IHomepagePalette {
-  background: string;
+  shellBackground: string;
+  base: string;
+  surface: string;
   text: string;
+  muted: string;
   accent: string;
+  accentHover: string;
+  glow: string;
   button: string;
   buttonText: string;
-  shadow: string;
 }
 
 interface IHomepageThemeDefinition {
@@ -35,6 +39,7 @@ export interface IHomepageThemeState extends IHomepageThemeDefinition {
   segment: HomepageSegment;
   copyIndex: number;
   headline: string;
+  currentTimeLabel: string;
 }
 
 const HOMEPAGE_THEME_MAP: Record<HomepageSegment, IHomepageThemeDefinition> = {
@@ -42,13 +47,16 @@ const HOMEPAGE_THEME_MAP: Record<HomepageSegment, IHomepageThemeDefinition> = {
     label: "凌晨",
     timeRange: "00:00 - 04:59",
     palette: {
-      background:
-        "radial-gradient(circle at top left, rgba(255, 255, 255, 0.10), transparent 34%), linear-gradient(180deg, #251e1a 0%, #1b1613 100%)",
-      text: "#f0e6dc",
-      accent: "#c9b6a6",
-      button: "#efe1d2",
-      buttonText: "#241d19",
-      shadow: "0 10px 24px rgba(17, 12, 9, 0.28)",
+      shellBackground: "#050403",
+      base: "#0D0907",
+      surface: "#18110D",
+      text: "#F7EFE8",
+      muted: "rgba(247, 239, 232, 0.42)",
+      accent: "#FF9A3D",
+      accentHover: "#FFAE5C",
+      glow: "rgba(255, 154, 61, 0.18)",
+      button: "#FF9A3D",
+      buttonText: "#120C08",
     },
     copyOptions: [
       "现在做一顿，也不晚。",
@@ -60,13 +68,16 @@ const HOMEPAGE_THEME_MAP: Record<HomepageSegment, IHomepageThemeDefinition> = {
     label: "早上",
     timeRange: "05:00 - 08:59",
     palette: {
-      background:
-        "radial-gradient(circle at top left, rgba(255, 255, 255, 0.96), transparent 34%), linear-gradient(180deg, #fdf4ef 0%, #f7e7df 100%)",
-      text: "#332419",
-      accent: "#876e5c",
-      button: "#70503c",
-      buttonText: "#fffaf6",
-      shadow: "0 10px 24px rgba(72, 50, 35, 0.12)",
+      shellBackground: "#F8E9E1",
+      base: "#FFF5F0",
+      surface: "#FFE7D9",
+      text: "#3D2012",
+      muted: "rgba(61, 32, 18, 0.5)",
+      accent: "#FF8260",
+      accentHover: "#FF6A42",
+      glow: "rgba(255, 130, 96, 0.4)",
+      button: "#FF8260",
+      buttonText: "#FFFFFF",
     },
     copyOptions: [
       "早上也可以慢一点。",
@@ -78,13 +89,16 @@ const HOMEPAGE_THEME_MAP: Record<HomepageSegment, IHomepageThemeDefinition> = {
     label: "上午",
     timeRange: "09:00 - 11:59",
     palette: {
-      background:
-        "radial-gradient(circle at top left, rgba(255, 255, 255, 0.82), transparent 34%), linear-gradient(180deg, #f8eedb 0%, #f0e0c4 100%)",
+      shellBackground: "#F5EEE6",
+      base: "#FBF6EF",
+      surface: "#F4EBDD",
       text: "#332419",
-      accent: "#876e5c",
-      button: "#5f4332",
-      buttonText: "#fffaf6",
-      shadow: "0 10px 24px rgba(72, 50, 35, 0.14)",
+      muted: "rgba(51, 36, 25, 0.5)",
+      accent: "#E07B47",
+      accentHover: "#CC6A37",
+      glow: "rgba(224, 123, 71, 0.26)",
+      button: "#E07B47",
+      buttonText: "#FFFFFF",
     },
     copyOptions: [
       "从一顿热的开始。",
@@ -96,13 +110,16 @@ const HOMEPAGE_THEME_MAP: Record<HomepageSegment, IHomepageThemeDefinition> = {
     label: "中午",
     timeRange: "12:00 - 13:59",
     palette: {
-      background:
-        "radial-gradient(circle at top left, rgba(255, 255, 255, 0.88), transparent 34%), linear-gradient(180deg, #fcf0cf 0%, #f4dfb2 100%)",
-      text: "#4a2d17",
-      accent: "#956942",
-      button: "#8d572f",
-      buttonText: "#fffaf4",
-      shadow: "0 10px 24px rgba(95, 61, 29, 0.16)",
+      shellBackground: "#F3EEE7",
+      base: "#FDFBF7",
+      surface: "#F2EBE1",
+      text: "#271E15",
+      muted: "rgba(39, 30, 21, 0.5)",
+      accent: "#DD6A2A",
+      accentHover: "#C55C22",
+      glow: "rgba(221, 106, 42, 0.3)",
+      button: "#DD6A2A",
+      buttonText: "#FFFFFF",
     },
     copyOptions: [
       "中午给自己做点吃的。",
@@ -114,13 +131,16 @@ const HOMEPAGE_THEME_MAP: Record<HomepageSegment, IHomepageThemeDefinition> = {
     label: "下午",
     timeRange: "14:00 - 16:59",
     palette: {
-      background:
-        "radial-gradient(circle at top left, rgba(255, 255, 255, 0.72), transparent 34%), linear-gradient(180deg, #f2e1ce 0%, #e6d0bc 100%)",
-      text: "#3d2718",
-      accent: "#8c6342",
-      button: "#74472b",
-      buttonText: "#fffaf4",
-      shadow: "0 10px 24px rgba(90, 55, 31, 0.16)",
+      shellBackground: "#E9DDD1",
+      base: "#F2E6D9",
+      surface: "#E7D4C4",
+      text: "#3B281B",
+      muted: "rgba(59, 40, 27, 0.52)",
+      accent: "#C96A3A",
+      accentHover: "#B95E31",
+      glow: "rgba(201, 106, 58, 0.24)",
+      button: "#C96A3A",
+      buttonText: "#FFFFFF",
     },
     copyOptions: [
       "下午适合做顿简单的。",
@@ -132,13 +152,16 @@ const HOMEPAGE_THEME_MAP: Record<HomepageSegment, IHomepageThemeDefinition> = {
     label: "傍晚",
     timeRange: "17:00 - 19:59",
     palette: {
-      background:
-        "radial-gradient(circle at top left, rgba(255, 255, 255, 0.66), transparent 34%), linear-gradient(180deg, #efd5ca 0%, #dfb9aa 100%)",
-      text: "#332419",
-      accent: "#905949",
-      button: "#844637",
-      buttonText: "#fff8f2",
-      shadow: "0 10px 24px rgba(95, 50, 37, 0.18)",
+      shellBackground: "#1A0F0A",
+      base: "#2B160E",
+      surface: "#3D2218",
+      text: "#FFF0E6",
+      muted: "rgba(255, 240, 230, 0.6)",
+      accent: "#FF5E33",
+      accentHover: "#FF7A55",
+      glow: "rgba(255, 94, 51, 0.2)",
+      button: "#FF5E33",
+      buttonText: "#2B160E",
     },
     copyOptions: [
       "今晚做点热的。",
@@ -150,13 +173,16 @@ const HOMEPAGE_THEME_MAP: Record<HomepageSegment, IHomepageThemeDefinition> = {
     label: "晚上",
     timeRange: "20:00 - 23:59",
     palette: {
-      background:
-        "radial-gradient(circle at top left, rgba(255, 255, 255, 0.18), transparent 30%), linear-gradient(180deg, #342820 0%, #271d17 100%)",
-      text: "#f4e9de",
-      accent: "#d2bdad",
-      button: "#f2e7db",
-      buttonText: "#2a211b",
-      shadow: "0 10px 24px rgba(17, 12, 9, 0.24)",
+      shellBackground: "#090604",
+      base: "#120C08",
+      surface: "#1E1510",
+      text: "#FFFFFF",
+      muted: "rgba(255, 255, 255, 0.4)",
+      accent: "#FF8200",
+      accentHover: "#FFA23A",
+      glow: "rgba(255, 130, 0, 0.2)",
+      button: "#FF8200",
+      buttonText: "#120C08",
     },
     copyOptions: [
       "回来以后，认真做一顿。",
@@ -208,12 +234,16 @@ export function getHomepageThemeState(date: Date): IHomepageThemeState {
   const segment = resolveHomepageSegment(timezoneDate.getUTCHours());
   const definition = HOMEPAGE_THEME_MAP[segment];
   const copyIndex = getCopyIndexForHour(date);
+  const currentTimeLabel = `${String(timezoneDate.getUTCHours()).padStart(2, "0")}:${String(
+    timezoneDate.getUTCMinutes(),
+  ).padStart(2, "0")}`;
 
   return {
     ...definition,
     segment,
     copyIndex,
     headline: definition.copyOptions[copyIndex] ?? definition.copyOptions[0],
+    currentTimeLabel,
   };
 }
 
@@ -241,12 +271,16 @@ export function useHomepageTheme() {
   });
 
   const heroStyle = computed(() => ({
-    "--homepage-background": themeState.value.palette.background,
+    "--homepage-shell-background": themeState.value.palette.shellBackground,
+    "--homepage-base": themeState.value.palette.base,
+    "--homepage-surface": themeState.value.palette.surface,
     "--homepage-text": themeState.value.palette.text,
+    "--homepage-muted": themeState.value.palette.muted,
     "--homepage-accent": themeState.value.palette.accent,
+    "--homepage-accent-hover": themeState.value.palette.accentHover,
+    "--homepage-glow": themeState.value.palette.glow,
     "--homepage-button": themeState.value.palette.button,
     "--homepage-button-text": themeState.value.palette.buttonText,
-    "--homepage-shadow": themeState.value.palette.shadow,
   }));
 
   return {

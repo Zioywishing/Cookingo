@@ -41,6 +41,9 @@ withDefaults(defineProps<{
         </tbody>
       </table>
     </div>
+    <div v-if="$slots.footer" class="table-footer">
+      <slot name="footer" />
+    </div>
   </AdminBaseAdminCard>
 </template>
 
@@ -51,6 +54,14 @@ withDefaults(defineProps<{
 
 .table-scroll {
   overflow-x: auto;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--admin-border-subtle, #f3f4f6);
 }
 
 .admin-table {

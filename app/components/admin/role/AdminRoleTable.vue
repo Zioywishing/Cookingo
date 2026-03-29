@@ -3,11 +3,16 @@ import type { AdminRoleListItem } from "#shared/types/admin"
 
 defineProps<{
   items: AdminRoleListItem[]
+  page: number
+  pageSize: number
+  total: number
   pending?: boolean
 }>()
 
 const emit = defineEmits<{
   delete: [id: string]
+  "update:page": [page: number]
+  "update:pageSize": [pageSize: number]
 }>()
 </script>
 
@@ -47,6 +52,17 @@ const emit = defineEmits<{
         </AdminBaseAdminButton>
       </td>
     </tr>
+
+    <template #footer>
+      <AdminBaseAdminPagination
+        :page="page"
+        :page-size="pageSize"
+        :total="total"
+        :pending="pending"
+        @update:page="emit('update:page', $event)"
+        @update:pageSize="emit('update:pageSize', $event)"
+      />
+    </template>
   </AdminBaseAdminTable>
 </template>
 

@@ -63,6 +63,45 @@ describe("admin pages", () => {
     expect(rolesPage).toContain(":permissions=\"rolePermissions || []\"")
   })
 
+  test("adds a reusable admin pagination component and table footer slot", () => {
+    expect(readProjectFile("app/components/admin/base/AdminPagination.vue")).toContain("update:page")
+    expect(readProjectFile("app/components/admin/base/AdminPagination.vue")).toContain("update:pageSize")
+    expect(readProjectFile("app/components/admin/base/AdminPagination.vue")).toContain("[20, 50, 100]")
+    expect(readProjectFile("app/components/admin/base/AdminTable.vue")).toContain("name=\"footer\"")
+  })
+
+  test("wires pagination props through admin list table components", () => {
+    const userTable = readProjectFile("app/components/admin/user/AdminUserTable.vue")
+    const roleTable = readProjectFile("app/components/admin/role/AdminRoleTable.vue")
+    const loginLogTable = readProjectFile("app/components/admin/log/AdminLoginLogTable.vue")
+    const auditLogTable = readProjectFile("app/components/admin/log/AdminAuditLogTable.vue")
+
+    for (const source of [userTable, roleTable, loginLogTable, auditLogTable]) {
+      expect(source).toContain("page: number")
+      expect(source).toContain("pageSize: number")
+      expect(source).toContain("total: number")
+      expect(source).toContain("update:page")
+      expect(source).toContain("update:pageSize")
+      expect(source).toContain("<AdminBaseAdminPagination")
+    }
+  })
+
+  test("keeps admin list pagination in page-local state", () => {
+    const usersPage = readProjectFile("app/pages/admin/users/index.vue")
+    const rolesPage = readProjectFile("app/pages/admin/roles/index.vue")
+    const loginLogsPage = readProjectFile("app/pages/admin/login-logs.vue")
+    const auditLogsPage = readProjectFile("app/pages/admin/audit-logs.vue")
+
+    for (const source of [usersPage, rolesPage, loginLogsPage, auditLogsPage]) {
+      expect(source).toContain("const page = ref(1)")
+      expect(source).toContain("const pageSize = ref(20)")
+      expect(source).toContain("page.value")
+      expect(source).toContain("pageSize.value")
+      expect(source).toContain("@update:page")
+      expect(source).toContain("@update:pageSize")
+    }
+  })
+
   test("moves auth pages away from inline error text and into popup feedback", () => {
     const loginPage = readProjectFile("app/pages/admin/login.vue")
     const initPage = readProjectFile("app/pages/admin/init.vue")

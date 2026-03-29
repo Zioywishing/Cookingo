@@ -39,12 +39,17 @@ describe("useHomepageTheme helpers", () => {
 
     expect(state.segment).toBe(HomepageSegment.Dusk);
     expect(state.label).toBe("傍晚");
+    expect(state.currentTimeLabel).toBe("17:00");
     expect(state.copyOptions).toHaveLength(3);
     expect(state.copyOptions).toContain("今晚做点热的。");
     expect(state.headline).toBe(state.copyOptions[state.copyIndex]);
-    expect(state.palette.background).toContain("#efd5ca");
-    expect(state.palette.button).toBe("#844637");
-    expect(state.palette.text).toBe("#332419");
+    expect(state.palette.shellBackground).toBe("#1A0F0A");
+    expect(state.palette.base).toBe("#2B160E");
+    expect(state.palette.surface).toBe("#3D2218");
+    expect(state.palette.glow).toContain("255, 94, 51");
+    expect(state.palette.button).toBe("#FF5E33");
+    expect(state.palette.buttonText).toBe("#2B160E");
+    expect(state.palette.text).toBe("#FFF0E6");
   });
 
   test("uses fixed east-8 timezone instead of the runtime local timezone", () => {
@@ -54,5 +59,6 @@ describe("useHomepageTheme helpers", () => {
     expect(state.segment).toBe(HomepageSegment.Midnight);
     expect(state.label).toBe("凌晨");
     expect(state.timeRange).toBe("00:00 - 04:59");
+    expect(state.currentTimeLabel).toBe("02:00");
   });
 });

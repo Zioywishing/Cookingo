@@ -21,17 +21,38 @@ definePageMeta({
 const usersApi = useAdminUsers()
 const createOpen = ref(false)
 const createPending = ref(false)
+const page = ref(1)
+const pageSize = ref(20)
 
 const {
   data: pageData,
   pending,
   refresh,
 } = await useAsyncData("admin-users-page", () =>
-  feedback.load(() => usersApi.listUsers(), {
+  feedback.load(() => usersApi.listUsers(page.value, pageSize.value), {
     errorMessage: "加载用户列表失败",
     fallback: emptyUsersPage,
   }),
 )
+
+async function handlePageChange(nextPage: number) {
+  if (nextPage === page.value) {
+    return
+  }
+
+  page.value = nextPage
+  await refresh()
+}
+
+async function handlePageSizeChange(nextPageSize: number) {
+  if (nextPageSize === pageSize.value) {
+    return
+  }
+
+  pageSize.value = nextPageSize
+  page.value = 1
+  await refresh()
+}
 
 async function handleCreateUser(payload: {
   username: string
@@ -64,7 +85,15 @@ async function handleCreateUser(payload: {
       </AdminBaseAdminButton>
     </AdminBaseAdminToolbar>
 
-    <AdminUserTable :items="pageData?.items || []" :pending="pending" />
+    <AdminUserTable
+      :items="pageData?.items || []"
+      :page="page"
+      :page-size="pageSize"
+      :total="pageData?.total || 0"
+      :pending="pending"
+      @update:page="handlePageChange"
+      @update:pageSize="handlePageSizeChange"
+    />
 
     <AdminUserCreateDialog
       :open="createOpen"

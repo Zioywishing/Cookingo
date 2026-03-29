@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test"
 import { eq } from "drizzle-orm"
+import { readFileSync } from "node:fs"
+import { resolve } from "node:path"
 
 import { ADMIN_AUTH_BAD_CREDENTIALS, ADMIN_AUTH_INVALID, ADMIN_SYSTEM_ALREADY_INITIALIZED } from "../server/utils/admin/error-codes"
 import { ROOT_ROLE_CODE } from "../server/utils/admin/permissions"
@@ -9,6 +11,7 @@ import { getNowIso } from "../server/utils/admin/time"
 import { createTempAdminDb } from "./helpers/admin-test-db"
 
 const cleanups: Array<() => void> = []
+const projectRoot = resolve(import.meta.dir, "..")
 
 afterEach(() => {
   for (const cleanup of cleanups.splice(0)) {
@@ -17,6 +20,12 @@ afterEach(() => {
 })
 
 describe("admin services", () => {
+  test("keeps admin user service free of unused auth-invalid imports", () => {
+    const source = readFileSync(resolve(projectRoot, "server/services/admin/admin-user-service.ts"), "utf8")
+
+    expect(source).not.toContain("ADMIN_AUTH_INVALID,")
+  })
+
   test("reports whether the admin system has been initialized", async () => {
     const fixture = createTempAdminDb()
     cleanups.push(() => fixture.cleanup())

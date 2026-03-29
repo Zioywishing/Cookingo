@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { getTableName } from "drizzle-orm";
 
@@ -13,6 +12,16 @@ afterEach(() => {
 });
 
 describe("admin drizzle schema", () => {
+  test("keeps schema test imports free of unused temp directory helpers", () => {
+    const source = readFileSync(resolve(import.meta.dir, "adminSchema.test.ts"), "utf8");
+    const mkdImportName = ["mkd", "tempSync"].join("");
+    const tmpdirImportName = ["tmp", "dir"].join("");
+    const importBlock = source.split("\n").slice(0, 4).join("\n");
+
+    expect(importBlock).not.toContain(mkdImportName);
+    expect(importBlock).not.toContain(tmpdirImportName);
+  });
+
   test("declares all IAM tables", async () => {
     const schema = await import("../server/db/schema");
 
