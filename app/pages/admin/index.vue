@@ -11,6 +11,10 @@ definePageMeta({
 
 const session = useAdminSession()
 
+const currentDisplayName = computed(() => session.user.value?.displayName || "未登录")
+const currentUsername = computed(() => session.user.value?.username || "guest")
+const permissionCount = computed(() => session.permissions.value.length)
+
 const availableModules = computed(() => {
   const modules = [
     { title: "用户管理", path: "/admin/users", code: AdminPermissionCode.Users, description: "创建、授权和维护后台账号。" },
@@ -24,14 +28,14 @@ const availableModules = computed(() => {
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="后台首页" description="当前为 IAM 一期后台底座，优先承载登录、权限、用户、角色与安全运维能力。" />
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="后台首页" description="当前为 IAM 一期后台底座，优先承载登录、权限、用户、角色与安全运维能力。" />
 
     <section class="panel">
       <div class="intro">
-        <h2>{{ session.user?.displayName || "未登录" }}</h2>
+        <h2>{{ currentDisplayName }}</h2>
         <p class="description">
-          当前账号：{{ session.user?.username || "guest" }} · 当前拥有 {{ session.permissions.length }} 个页面权限。
+          当前账号：{{ currentUsername }} · 当前拥有 {{ permissionCount }} 个页面权限。
         </p>
       </div>
 
@@ -42,7 +46,7 @@ const availableModules = computed(() => {
         </NuxtLink>
       </div>
     </section>
-  </AdminPageContainer>
+  </AdminShellAdminPageContainer>
 </template>
 
 <style scoped>

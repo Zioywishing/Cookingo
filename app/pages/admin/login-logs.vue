@@ -14,8 +14,8 @@ const { data: pageData, pending } = await useAsyncData("admin-login-logs-page", 
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="登录日志" description="查看后台登录成功与失败记录。" />
-    <AdminLoginLogTable :items="pageData?.items || []" :pending="pending" />
-  </AdminPageContainer>
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="登录日志" description="查看后台登录成功与失败记录。" />
+    <AdminLogAdminLoginLogTable :items="pageData?.items || []" :pending="pending" />
+  </AdminShellAdminPageContainer>
 </template>

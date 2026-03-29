@@ -14,8 +14,8 @@ const { data: pageData, pending } = await useAsyncData("admin-audit-logs-page", 
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="操作审计" description="查看后台关键行为审计记录。" />
-    <AdminAuditLogTable :items="pageData?.items || []" :pending="pending" />
-  </AdminPageContainer>
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="操作审计" description="查看后台关键行为审计记录。" />
+    <AdminLogAdminAuditLogTable :items="pageData?.items || []" :pending="pending" />
+  </AdminShellAdminPageContainer>
 </template>

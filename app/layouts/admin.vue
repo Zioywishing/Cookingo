@@ -5,6 +5,8 @@ const route = useRoute()
 const router = useRouter()
 const session = useAdminSession()
 const mobileOpen = ref(false)
+const currentDisplayName = computed(() => session.user.value?.displayName || "未登录")
+const currentUsername = computed(() => session.user.value?.username || "guest")
 
 const navItems = computed(() => {
   const items = [
@@ -62,15 +64,15 @@ async function handleLogout() {
 <template>
   <div class="admin-layout">
     <div class="admin-shell">
-      <AdminSidebar :items="navItems" />
-      <AdminMobileSidebar :items="navItems" :open="mobileOpen" @close="mobileOpen = false" />
+      <AdminShellAdminSidebar :items="navItems" />
+      <AdminShellAdminMobileSidebar :items="navItems" :open="mobileOpen" @close="mobileOpen = false" />
 
       <div class="admin-main">
-        <AdminTopbar
+        <AdminShellAdminTopbar
           :title="pageMeta.title"
           :description="pageMeta.description"
-          :display-name="session.user?.displayName || '未登录'"
-          :username="session.user?.username || 'guest'"
+          :display-name="currentDisplayName"
+          :username="currentUsername"
           @toggle-menu="mobileOpen = true"
           @logout="handleLogout"
         />

@@ -16,7 +16,7 @@ defineProps<{
       <h2>IAM 一期</h2>
     </div>
 
-    <AdminSidebarNav :items="items" />
+    <AdminShellAdminSidebarNav :items="items" />
   </aside>
 </template>
 

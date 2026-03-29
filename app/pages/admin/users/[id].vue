@@ -62,8 +62,8 @@ async function handleResetPassword(password: string) {
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="用户详情" description="查看并维护后台用户信息、角色和安全设置。" />
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="用户详情" description="查看并维护后台用户信息、角色和安全设置。" />
 
     <AdminUserProfileCard :user="userDetail || null" :pending="pending || pendingAction" @save="handleSaveProfile" />
     <AdminUserRolePanel
@@ -73,5 +73,5 @@ async function handleResetPassword(password: string) {
       @save="handleSaveRoles"
     />
     <AdminUserSecurityPanel :user="userDetail || null" :pending="pendingAction" @status="handleStatus" @reset-password="handleResetPassword" />
-  </AdminPageContainer>
+  </AdminShellAdminPageContainer>
 </template>

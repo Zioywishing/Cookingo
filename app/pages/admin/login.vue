@@ -41,8 +41,8 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="登录后台" description="系统已完成初始化，请使用管理员账号登录。" />
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="登录后台" description="系统已完成初始化，请使用管理员账号登录。" />
 
     <section class="card">
       <div class="grid">
@@ -56,7 +56,7 @@ async function handleSubmit() {
         {{ pending ? "登录中..." : "登录后台" }}
       </button>
     </section>
-  </AdminPageContainer>
+  </AdminShellAdminPageContainer>
 </template>
 
 <style scoped>

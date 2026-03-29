@@ -57,7 +57,7 @@ function togglePermission(code: string) {
     </div>
 
     <div class="permissions">
-      <AdminPermissionGroup
+      <AdminRoleAdminPermissionGroup
         v-for="group in ['overview', 'iam', 'security']"
         :key="group"
         :group-key="group"

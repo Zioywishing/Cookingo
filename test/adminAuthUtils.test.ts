@@ -26,6 +26,22 @@ describe("admin auth utils", () => {
     expect(payload.exp).toBeNumber()
   })
 
+  test("throws a readable error when admin jwt secret is missing", async () => {
+    const { signAdminJwt } = await import("../server/utils/auth/jwt")
+
+    await expect(signAdminJwt(
+      {
+        sub: "user_1",
+        username: "root",
+        tokenVersion: 3,
+      },
+      {
+        secret: "",
+        ttlDays: 14,
+      },
+    )).rejects.toThrow("admin jwt secret is required")
+  })
+
   test("builds secure cookie defaults for admin session", async () => {
     const { getAdminCookieOptions } = await import("../server/utils/auth/cookie")
 

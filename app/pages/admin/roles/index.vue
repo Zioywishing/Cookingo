@@ -6,7 +6,7 @@ definePageMeta({
   middleware: ["admin-init", "admin-auth"],
   adminPermission: AdminPermissionCode.Roles,
   adminPageTitle: "角色管理",
-  adminPageDescription: "配置角色信息与后台页面权限。",
+  adminPageDescription: "创建角色并配置后台页面权限。",
 })
 
 const rolesApi = useAdminRoles()
@@ -14,12 +14,12 @@ const createOpen = ref(false)
 const createPending = ref(false)
 const createErrorMessage = ref("")
 
-const { data: permissions } = await useAsyncData("admin-role-permissions", () => rolesApi.listPermissions())
 const {
   data: pageData,
   pending,
   refresh,
 } = await useAsyncData("admin-roles-page", () => rolesApi.listRoles())
+const { data: rolePermissions } = await useAsyncData("admin-role-permissions", () => rolesApi.listPermissions())
 
 async function handleCreateRole(payload: {
   name: string
@@ -48,8 +48,8 @@ async function handleDeleteRole(id: string) {
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="角色管理" description="配置角色信息与后台页面权限。" />
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="角色管理" description="创建角色并配置后台页面权限。" />
 
     <div class="toolbar">
       <button type="button" @click="createOpen = true">
@@ -61,13 +61,13 @@ async function handleDeleteRole(id: string) {
 
     <AdminRoleCreateDialog
       :open="createOpen"
-      :permissions="permissions || []"
+      :permissions="rolePermissions || []"
       :pending="createPending"
       :error-message="createErrorMessage"
       @close="createOpen = false"
       @submit="handleCreateRole"
     />
-  </AdminPageContainer>
+  </AdminShellAdminPageContainer>
 </template>
 
 <style scoped>

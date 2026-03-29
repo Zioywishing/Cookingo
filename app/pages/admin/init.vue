@@ -57,8 +57,8 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="初始化管理后台" description="系统首次部署后，请先创建首个超级管理员账号。" />
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="初始化管理后台" description="系统首次部署后，请先创建首个超级管理员账号。" />
 
     <section class="card">
       <div class="grid">
@@ -77,7 +77,7 @@ async function handleSubmit() {
         {{ pending ? "初始化中..." : "初始化管理后台" }}
       </button>
     </section>
-  </AdminPageContainer>
+  </AdminShellAdminPageContainer>
 </template>
 
 <style scoped>

@@ -37,9 +37,9 @@ async function handleSaveRole(payload: {
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="角色详情" description="编辑角色信息并配置后台页面权限。" />
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="角色详情" description="编辑角色信息并配置后台页面权限。" />
 
     <AdminRoleForm :role="roleDetail || null" :permissions="permissions || []" :pending="pending || pendingAction" @save="handleSaveRole" />
-  </AdminPageContainer>
+  </AdminShellAdminPageContainer>
 </template>

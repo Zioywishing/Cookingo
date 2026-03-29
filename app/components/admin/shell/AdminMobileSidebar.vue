@@ -15,6 +15,12 @@ const emit = defineEmits<{
 
 const route = useRoute()
 
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === "Escape" && props.open) {
+    emit("close")
+  }
+}
+
 watch(
   () => route.fullPath,
   () => {
@@ -33,15 +39,14 @@ if (import.meta.client) {
   )
 
   onBeforeUnmount(() => {
+    document.removeEventListener("keydown", handleKeydown)
     document.body.style.overflow = ""
   })
-}
 
-onKeyStroke("Escape", () => {
-  if (props.open) {
-    emit("close")
-  }
-})
+  onMounted(() => {
+    document.addEventListener("keydown", handleKeydown)
+  })
+}
 </script>
 
 <template>
@@ -56,7 +61,7 @@ onKeyStroke("Escape", () => {
           </button>
         </div>
 
-        <AdminSidebarNav :items="items" />
+        <AdminShellAdminSidebarNav :items="items" />
       </aside>
     </div>
   </Teleport>

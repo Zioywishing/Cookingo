@@ -41,8 +41,8 @@ async function handleCreateUser(payload: {
 </script>
 
 <template>
-  <AdminPageContainer>
-    <AdminPageHeader title="用户管理" description="创建、查看和维护后台账号。" />
+  <AdminShellAdminPageContainer>
+    <AdminShellAdminPageHeader title="用户管理" description="创建、查看和维护后台账号。" />
 
     <div class="toolbar">
       <button type="button" @click="createOpen = true">
@@ -59,7 +59,7 @@ async function handleCreateUser(payload: {
       @close="createOpen = false"
       @submit="handleCreateUser"
     />
-  </AdminPageContainer>
+  </AdminShellAdminPageContainer>
 </template>
 
 <style scoped>

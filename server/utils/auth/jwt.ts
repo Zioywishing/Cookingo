@@ -11,6 +11,10 @@ export interface AdminJwtPayload {
 }
 
 function getJwtSecret(secret: string) {
+  if (!secret) {
+    throw new Error("admin jwt secret is required")
+  }
+
   return new TextEncoder().encode(secret)
 }
 

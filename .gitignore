@@ -31,3 +31,7 @@ logs
 # Local Codex skill caches
 .codex/**/__pycache__/
 .codex/**/*.pyc
+
+data
+
+.temp
