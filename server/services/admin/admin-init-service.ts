@@ -12,6 +12,14 @@ import { getAdminRoleByCode } from "../../repositories/admin/admin-role-reposito
 
 import type { AdminDb } from "../../db/seed"
 
+export async function getAdminInitStatus(db: AdminDb) {
+  seedAdminBaseData(db)
+
+  return {
+    initialized: countAdminUsers(db) > 0,
+  }
+}
+
 export async function initializeAdminSystem(
   db: AdminDb,
   input: {

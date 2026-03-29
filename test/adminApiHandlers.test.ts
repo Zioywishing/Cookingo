@@ -11,6 +11,7 @@ function readProjectFile(relativePath: string) {
 describe("admin api handlers", () => {
   test("adds the required admin route files", () => {
     const routes = [
+      "server/api/admin/get/initStatus.ts",
       "server/api/admin/post/initAdmin.ts",
       "server/api/admin/post/login.ts",
       "server/api/admin/post/logout.ts",
@@ -39,11 +40,14 @@ describe("admin api handlers", () => {
   })
 
   test("protects key handlers with admin permission checks and zod parsing", () => {
+    const initStatusHandler = readProjectFile("server/api/admin/get/initStatus.ts")
     const usersHandler = readProjectFile("server/api/admin/get/users.ts")
     const loginLogsHandler = readProjectFile("server/api/admin/get/loginLogs.ts")
     const auditLogsHandler = readProjectFile("server/api/admin/get/auditLogs.ts")
     const createUserHandler = readProjectFile("server/api/admin/post/users.ts")
 
+    expect(initStatusHandler).toContain("getAdminInitStatus")
+    expect(initStatusHandler).toContain("successResponse")
     expect(usersHandler).toContain('requireAdminPermission(event, "admin.users")')
     expect(loginLogsHandler).toContain('requireAdminPermission(event, "admin.login-logs")')
     expect(auditLogsHandler).toContain('requireAdminPermission(event, "admin.audit-logs")')

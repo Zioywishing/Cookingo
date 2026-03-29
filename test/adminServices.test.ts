@@ -17,6 +17,23 @@ afterEach(() => {
 })
 
 describe("admin services", () => {
+  test("reports whether the admin system has been initialized", async () => {
+    const fixture = createTempAdminDb()
+    cleanups.push(() => fixture.cleanup())
+
+    const { getAdminInitStatus, initializeAdminSystem } = await import("../server/services/admin/admin-init-service")
+
+    await expect(getAdminInitStatus(fixture.db)).resolves.toEqual({ initialized: false })
+
+    await initializeAdminSystem(fixture.db, {
+      username: "root",
+      displayName: "Root",
+      password: "Strong!123",
+    })
+
+    await expect(getAdminInitStatus(fixture.db)).resolves.toEqual({ initialized: true })
+  })
+
   test("initializes the first admin only once", async () => {
     const fixture = createTempAdminDb()
     cleanups.push(() => fixture.cleanup())
