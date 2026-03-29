@@ -446,6 +446,10 @@ seed 必须可重复执行，重复执行不得产生重复数据。
 
 `{ code, data, msg }`
 
+本期认证与初始化阶段新增一个无需鉴权的只读接口：
+
+- `GET /api/admin/get/initStatus`
+
 错误场景下默认：
 
 - `data: null`

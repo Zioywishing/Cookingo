@@ -1,33 +1,48 @@
 <script setup lang="ts">
+import { AdminPermissionCode } from "#shared/types/admin"
+
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: ["admin-init", "admin-auth"],
+  adminPermission: AdminPermissionCode.Dashboard,
+  adminPageTitle: "后台首页",
+  adminPageDescription: "查看当前登录身份与可访问模块。",
+})
+
+const session = useAdminSession()
+
+const availableModules = computed(() => {
+  const modules = [
+    { title: "用户管理", path: "/admin/users", code: AdminPermissionCode.Users, description: "创建、授权和维护后台账号。" },
+    { title: "角色管理", path: "/admin/roles", code: AdminPermissionCode.Roles, description: "配置角色信息与后台页面权限。" },
+    { title: "登录日志", path: "/admin/login-logs", code: AdminPermissionCode.LoginLogs, description: "查看后台登录成功与失败记录。" },
+    { title: "操作审计", path: "/admin/audit-logs", code: AdminPermissionCode.AuditLogs, description: "查看后台关键行为审计记录。" },
+  ]
+
+  return modules.filter((item) => session.hasPermission(item.code))
 })
 </script>
 
 <template>
-  <section class="panel">
-    <div class="intro">
-      <h1>管理后台占位页</h1>
-      <p class="description">
-        这里是内部管理区域，后续会逐步接入菜谱管理、分类管理、内容审核和系统设置。
-      </p>
-    </div>
+  <AdminPageContainer>
+    <AdminPageHeader title="后台首页" description="当前为 IAM 一期后台底座，优先承载登录、权限、用户、角色与安全运维能力。" />
 
-    <div class="modules">
-      <article>
-        <h2>菜谱管理</h2>
-        <p>新增、编辑、发布和下线菜谱内容。</p>
-      </article>
-      <article>
-        <h2>分类管理</h2>
-        <p>维护食材、菜系、场景与标签体系。</p>
-      </article>
-      <article>
-        <h2>运营设置</h2>
-        <p>后续放置推荐位、审核流与系统配置。</p>
-      </article>
-    </div>
-  </section>
+    <section class="panel">
+      <div class="intro">
+        <h2>{{ session.user?.displayName || "未登录" }}</h2>
+        <p class="description">
+          当前账号：{{ session.user?.username || "guest" }} · 当前拥有 {{ session.permissions.length }} 个页面权限。
+        </p>
+      </div>
+
+      <div class="modules">
+        <NuxtLink v-for="module in availableModules" :key="module.path" :to="module.path" class="module-card">
+          <h3>{{ module.title }}</h3>
+          <p>{{ module.description }}</p>
+        </NuxtLink>
+      </div>
+    </section>
+  </AdminPageContainer>
 </template>
 
 <style scoped>
@@ -43,7 +58,7 @@ definePageMeta({
   max-width: 720px;
 }
 
-h1 {
+h2 {
   margin: 0;
   font-size: clamp(1.8rem, 5vw, 3rem);
 }
@@ -61,19 +76,22 @@ h1 {
   margin-top: 32px;
 }
 
-article {
+.module-card {
+  display: block;
   padding: 20px;
   border-radius: 22px;
   background: rgba(30, 41, 59, 0.68);
   border: 1px solid rgba(148, 163, 184, 0.18);
+  text-decoration: none;
+  color: inherit;
 }
 
-h2 {
+h3 {
   margin: 0 0 10px;
   font-size: 1.02rem;
 }
 
-article p {
+.module-card p {
   margin: 0;
   line-height: 1.7;
   color: #cbd5e1;
