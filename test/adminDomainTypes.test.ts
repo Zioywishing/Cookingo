@@ -17,6 +17,9 @@ describe("admin domain types and helpers", () => {
     expect(sharedAdmin).toContain("AdminUserStatus");
     expect(sharedAdmin).toContain("AdminPermissionCode");
     expect(sharedAdmin).toContain("AdminCurrentUser");
+    expect(sharedAdmin).toContain("AdminSessionUser");
+    expect(sharedAdmin).toContain("AdminSessionState");
+    expect(sharedAdmin).toContain("AdminPageMetaByPath");
     expect(sharedApi).toContain("ApiPageData");
     expect(sharedIndex).toContain('export * from "./admin"');
   });
