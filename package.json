@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "build": "bun run --bun nuxt build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun run server/db/migrate.ts",
+    "db:seed": "bun run server/db/seed/index.ts",
     "dev": "bun run --bun nuxt dev",
     "generate": "nuxt generate",
     "preview": "bun run --bun nuxt preview",
@@ -11,9 +14,16 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "^2.3.1",
     "@nuxt/eslint": "1.15.2",
+    "drizzle-orm": "^0.44.7",
+    "jose": "^6.1.0",
     "nuxt": "^4.4.2",
     "vue": "^3.5.30",
-    "vue-router": "^5.0.4"
+    "vue-router": "^5.0.4",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.5"
   }
 }

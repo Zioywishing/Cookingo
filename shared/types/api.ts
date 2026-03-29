@@ -3,3 +3,10 @@ export interface ApiResponse<T = unknown> {
   data: T;
   msg: string;
 }
+
+export interface ApiPageData<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
