@@ -1,25 +1,43 @@
 <script setup lang="ts">
-import { AdminPermissionCode } from "#shared/types/admin"
+import { AdminPageMetaByPath, AdminPermissionCode } from "#shared/admin/domain"
+
+const pageMeta = AdminPageMetaByPath["/admin/roles"]!
+const feedback = useAdminRequestFeedback()
+const emptyRolesPage = {
+  items: [],
+  total: 0,
+  page: 1,
+  pageSize: 20,
+}
 
 definePageMeta({
   layout: "admin",
   middleware: ["admin-init", "admin-auth"],
   adminPermission: AdminPermissionCode.Roles,
-  adminPageTitle: "角色管理",
-  adminPageDescription: "创建角色并配置后台页面权限。",
+  adminPageTitle: pageMeta.title,
+  adminPageDescription: pageMeta.description,
 })
 
 const rolesApi = useAdminRoles()
 const createOpen = ref(false)
 const createPending = ref(false)
-const createErrorMessage = ref("")
 
 const {
   data: pageData,
   pending,
   refresh,
-} = await useAsyncData("admin-roles-page", () => rolesApi.listRoles())
-const { data: rolePermissions } = await useAsyncData("admin-role-permissions", () => rolesApi.listPermissions())
+} = await useAsyncData("admin-roles-page", () =>
+  feedback.load(() => rolesApi.listRoles(), {
+    errorMessage: "加载角色列表失败",
+    fallback: emptyRolesPage,
+  }),
+)
+const { data: rolePermissions } = await useAsyncData("admin-role-permissions", () =>
+  feedback.load(() => rolesApi.listPermissions(), {
+    errorMessage: "加载角色权限失败",
+    fallback: [],
+  }),
+)
 
 async function handleCreateRole(payload: {
   name: string
@@ -28,12 +46,13 @@ async function handleCreateRole(payload: {
   permissionCodes: string[]
 }) {
   createPending.value = true
-  createErrorMessage.value = ""
-  const response = await rolesApi.createRole(payload)
+  const response = await feedback.run(() => rolesApi.createRole(payload), {
+    successMessage: "角色创建成功",
+    errorMessage: "创建角色失败",
+  })
   createPending.value = false
 
-  if (response.code !== 0) {
-    createErrorMessage.value = response.msg
+  if (!response) {
     return
   }
 
@@ -42,7 +61,15 @@ async function handleCreateRole(payload: {
 }
 
 async function handleDeleteRole(id: string) {
-  await rolesApi.deleteRole(id)
+  const response = await feedback.run(() => rolesApi.deleteRole(id), {
+    successMessage: "角色删除成功",
+    errorMessage: "删除角色失败",
+  })
+
+  if (!response) {
+    return
+  }
+
   await refresh()
 }
 </script>
@@ -51,11 +78,11 @@ async function handleDeleteRole(id: string) {
   <AdminShellAdminPageContainer>
     <AdminShellAdminPageHeader title="角色管理" description="创建角色并配置后台页面权限。" />
 
-    <div class="toolbar">
-      <button type="button" @click="createOpen = true">
+    <AdminBaseAdminToolbar>
+      <AdminBaseAdminButton type="button" variant="primary" @click="createOpen = true">
         新建角色
-      </button>
-    </div>
+      </AdminBaseAdminButton>
+    </AdminBaseAdminToolbar>
 
     <AdminRoleTable :items="pageData?.items || []" :pending="pending" @delete="handleDeleteRole" />
 
@@ -63,16 +90,8 @@ async function handleDeleteRole(id: string) {
       :open="createOpen"
       :permissions="rolePermissions || []"
       :pending="createPending"
-      :error-message="createErrorMessage"
       @close="createOpen = false"
       @submit="handleCreateRole"
     />
   </AdminShellAdminPageContainer>
 </template>
-
-<style scoped>
-.toolbar {
-  display: flex;
-  justify-content: flex-end;
-}
-</style>

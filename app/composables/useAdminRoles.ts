@@ -9,6 +9,14 @@ function getAdminRequestHeaders() {
   return import.meta.server ? useRequestHeaders(["cookie"]) : undefined
 }
 
+function unwrapAdminResponse<T>(response: ApiResponse<T>) {
+  if (response.code !== 0) {
+    throw new Error(response.msg || "请求失败，请稍后重试")
+  }
+
+  return response.data
+}
+
 export function useAdminRoles() {
   async function listRoles(page = 1, pageSize = 20) {
     const response = await $fetch<ApiResponse<ApiPageData<AdminRoleListItem>>>(
@@ -22,7 +30,7 @@ export function useAdminRoles() {
       },
     )
 
-    return response.data
+    return unwrapAdminResponse(response)
   }
 
   async function getRoleDetail(id: string) {
@@ -34,7 +42,7 @@ export function useAdminRoles() {
       },
     )
 
-    return response.data
+    return unwrapAdminResponse(response)
   }
 
   async function listPermissions() {
@@ -45,7 +53,7 @@ export function useAdminRoles() {
       },
     )
 
-    return response.data
+    return unwrapAdminResponse(response)
   }
 
   async function createRole(payload: {

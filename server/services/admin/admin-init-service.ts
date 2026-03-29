@@ -1,11 +1,16 @@
 import {
   ADMIN_SYSTEM_ALREADY_INITIALIZED,
 } from "../../utils/admin/error-codes"
+import {
+  ADMIN_ROOT_ROLE_MISSING_MESSAGE,
+  ADMIN_SYSTEM_ALREADY_INITIALIZED_MESSAGE,
+} from "../../utils/admin/error-messages"
 import { AdminDomainError } from "../../utils/admin/errors"
 import { createAdminId } from "../../utils/admin/id"
 import { hashAdminPassword } from "../../utils/admin/password"
 import { ROOT_ROLE_CODE } from "../../utils/admin/permissions"
 import { getNowIso } from "../../utils/admin/time"
+import { createInitialAdminUserFields } from "../../utils/admin/user-record"
 import { seedAdminBaseData } from "../../db/seed"
 import { createAdminUserRecord, countAdminUsers, createAdminUserRoles } from "../../repositories/admin/admin-user-repository"
 import { getAdminRoleByCode } from "../../repositories/admin/admin-role-repository"
@@ -33,7 +38,7 @@ export async function initializeAdminSystem(
   if (countAdminUsers(db) > 0) {
     throw new AdminDomainError(
       ADMIN_SYSTEM_ALREADY_INITIALIZED,
-      "system already initialized",
+      ADMIN_SYSTEM_ALREADY_INITIALIZED_MESSAGE,
     )
   }
 
@@ -41,7 +46,7 @@ export async function initializeAdminSystem(
   const rootRole = getAdminRoleByCode(db, ROOT_ROLE_CODE)
 
   if (!rootRole) {
-    throw new Error("root role missing")
+    throw new Error(ADMIN_ROOT_ROLE_MISSING_MESSAGE)
   }
 
   const user = createAdminUserRecord(db, {
@@ -49,12 +54,7 @@ export async function initializeAdminSystem(
     username: input.username,
     displayName: input.displayName,
     passwordHash: await hashAdminPassword(input.password),
-    status: "active",
-    tokenVersion: 1,
-    lastLoginAt: null,
-    passwordChangedAt: null,
-    createdAt: now,
-    updatedAt: now,
+    ...createInitialAdminUserFields(now),
   })
 
   createAdminUserRoles(db, [

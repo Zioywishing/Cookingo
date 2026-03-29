@@ -1,15 +1,19 @@
 import {
   ADMIN_PASSWORD_WEAK,
 } from "./error-codes"
+import { ADMIN_PASSWORD_MIN_LENGTH } from "./constants"
+import { ADMIN_PASSWORD_WEAK_MESSAGE } from "./error-messages"
 import { AdminDomainError } from "./errors"
 
-const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/
+const PASSWORD_RULE = new RegExp(
+  `^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{${ADMIN_PASSWORD_MIN_LENGTH},}$`,
+)
 
 export function assertAdminPassword(password: string) {
   if (!PASSWORD_RULE.test(password)) {
     throw new AdminDomainError(
       ADMIN_PASSWORD_WEAK,
-      "password must include upper, lower, number, and special char",
+      ADMIN_PASSWORD_WEAK_MESSAGE,
     )
   }
 }

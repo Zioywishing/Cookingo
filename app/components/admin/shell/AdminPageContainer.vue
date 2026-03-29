@@ -7,6 +7,6 @@
 <style scoped>
 .admin-page-container {
   display: grid;
-  gap: 18px;
+  gap: 1.5rem;
 }
 </style>

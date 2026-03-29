@@ -15,48 +15,41 @@ const password = ref("")
 </script>
 
 <template>
-  <section class="card">
-    <h3>安全操作</h3>
+  <AdminBaseAdminSection
+    title="安全操作"
+    description="执行启停用与密码重置等高风险后台操作。"
+    tone="danger"
+  >
     <div v-if="user" class="actions">
-      <button type="button" :disabled="pending" @click="emit('status', user.status === 'active' ? 'disabled' : 'active')">
+      <AdminBaseAdminButton
+        type="button"
+        variant="danger"
+        :loading="pending"
+        @click="emit('status', user.status === 'active' ? 'disabled' : 'active')"
+      >
         {{ user.status === "active" ? "禁用用户" : "启用用户" }}
-      </button>
+      </AdminBaseAdminButton>
 
       <div class="password-row">
-        <input v-model="password" type="password" placeholder="输入新密码" />
-        <button type="button" :disabled="pending || !password" @click="emit('resetPassword', password)">
+        <AdminBaseAdminField label="重置密码" hint="请输入新的后台登录密码。">
+          <AdminBaseAdminInput v-model="password" type="password" placeholder="输入新密码" />
+        </AdminBaseAdminField>
+        <AdminBaseAdminButton type="button" variant="primary" :disabled="!password" :loading="pending" @click="emit('resetPassword', password)">
           重置密码
-        </button>
+        </AdminBaseAdminButton>
       </div>
     </div>
-  </section>
+  </AdminBaseAdminSection>
 </template>
 
 <style scoped>
-.card {
-  padding: 24px;
-  border-radius: 24px;
-  border: 1px solid rgba(248, 113, 113, 0.18);
-  background: rgba(127, 29, 29, 0.12);
-}
-
 .actions {
   display: grid;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 1rem;
 }
 
 .password-row {
   display: grid;
-  gap: 10px;
-}
-
-input {
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(248, 113, 113, 0.2);
-  background: rgba(15, 23, 42, 0.56);
-  color: #f8fafc;
+  gap: 0.85rem;
 }
 </style>

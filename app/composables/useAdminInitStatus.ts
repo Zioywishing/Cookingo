@@ -1,8 +1,5 @@
+import type { AdminInitStatusData } from "#shared/types/admin"
 import type { ApiResponse } from "#shared/types/api"
-
-type AdminInitStatusData = {
-  initialized: boolean
-}
 
 function getAdminRequestHeaders() {
   return import.meta.server ? useRequestHeaders(["cookie"]) : undefined

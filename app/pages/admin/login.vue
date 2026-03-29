@@ -9,12 +9,12 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const session = useAdminSession()
+const feedback = useAdminRequestFeedback()
 const form = reactive({
   username: "",
   password: "",
 })
 const pending = ref(false)
-const errorMessage = ref("")
 
 await session.ensureLoaded()
 
@@ -24,19 +24,23 @@ if (session.user.value) {
 
 async function handleSubmit() {
   pending.value = true
-  errorMessage.value = ""
 
-  const response = await session.login(form.username, form.password)
+  const response = await feedback.run(
+    () => session.login(form.username, form.password),
+    {
+      errorMessage: "登录失败",
+      silentSuccess: true,
+    },
+  )
 
   pending.value = false
 
-  if (response.code === 0) {
-    const redirect = typeof route.query.redirect === "string" ? route.query.redirect : session.resolveHomePath()
-    await router.push(redirect)
+  if (!response) {
     return
   }
 
-  errorMessage.value = response.msg
+  const redirect = typeof route.query.redirect === "string" ? route.query.redirect : session.resolveHomePath()
+  await router.push(redirect)
 }
 </script>
 
@@ -44,44 +48,29 @@ async function handleSubmit() {
   <AdminShellAdminPageContainer>
     <AdminShellAdminPageHeader title="登录后台" description="系统已完成初始化，请使用管理员账号登录。" />
 
-    <section class="card">
+    <AdminBaseAdminCard title="Welcome Back" description="使用管理员账号进入 Cookingo 后台。" class="auth-card">
       <div class="grid">
-        <input v-model="form.username" placeholder="用户名" />
-        <input v-model="form.password" type="password" placeholder="密码" />
+        <AdminBaseAdminField label="用户名">
+          <AdminBaseAdminInput v-model="form.username" placeholder="请输入用户名" />
+        </AdminBaseAdminField>
+        <AdminBaseAdminField label="密码">
+          <AdminBaseAdminInput v-model="form.password" type="password" placeholder="请输入密码" />
+        </AdminBaseAdminField>
       </div>
-      <p v-if="errorMessage" class="error">
-        {{ errorMessage }}
-      </p>
-      <button type="button" :disabled="pending" @click="handleSubmit">
-        {{ pending ? "登录中..." : "登录后台" }}
-      </button>
-    </section>
+      <AdminBaseAdminButton type="button" variant="primary" block :loading="pending" @click="handleSubmit">
+        登录后台
+      </AdminBaseAdminButton>
+    </AdminBaseAdminCard>
   </AdminShellAdminPageContainer>
 </template>
 
 <style scoped>
-.card {
-  padding: 24px;
-  border-radius: 24px;
-  border: 1px solid rgba(125, 211, 252, 0.2);
-  background: rgba(15, 23, 42, 0.48);
+.auth-card {
+  max-width: 34rem;
 }
 
 .grid {
   display: grid;
-  gap: 12px;
-}
-
-input {
-  min-height: 46px;
-  padding: 0 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  background: rgba(15, 23, 42, 0.56);
-  color: #f8fafc;
-}
-
-.error {
-  color: #fca5a5;
+  gap: 0.9rem;
 }
 </style>

@@ -1,20 +1,11 @@
-export const AdminUserStatus = {
-  Active: "active",
-  Disabled: "disabled",
-} as const
+import type {
+  AdminPageMeta as AdminPageMetaBase,
+  AdminPermissionCode as AdminPermissionCodeBase,
+  AdminUserStatus as AdminUserStatusBase,
+} from "../admin/domain"
 
-export type AdminUserStatus = (typeof AdminUserStatus)[keyof typeof AdminUserStatus]
-
-export const AdminPermissionCode = {
-  Dashboard: "admin.dashboard",
-  Users: "admin.users",
-  Roles: "admin.roles",
-  LoginLogs: "admin.login-logs",
-  AuditLogs: "admin.audit-logs",
-} as const
-
-export type AdminPermissionCode =
-  (typeof AdminPermissionCode)[keyof typeof AdminPermissionCode]
+export type { AdminPermissionCode, AdminUserStatus } from "../admin/domain"
+export type AdminPageMeta = AdminPageMetaBase
 
 export interface AdminRoleSummary {
   id: string
@@ -26,13 +17,13 @@ export interface AdminCurrentUser {
   id: string
   username: string
   displayName: string
-  status: AdminUserStatus
+  status: AdminUserStatusBase
   roleCodes: string[]
-  permissions: AdminPermissionCode[]
+  permissions: AdminPermissionCodeBase[]
 }
 
 export interface AdminPermissionItem {
-  code: AdminPermissionCode
+  code: AdminPermissionCodeBase
   name: string
   groupKey: string
   routePath: string
@@ -43,50 +34,28 @@ export interface AdminSessionUser {
   id: string
   username: string
   displayName: string
-  status: AdminUserStatus
+  status: AdminUserStatusBase
+}
+
+export interface AdminAuthorization {
+  roleCodes: string[]
+  permissions: AdminPermissionCodeBase[]
+}
+
+export interface AdminSessionPayload {
+  user: AdminSessionUser
+  authorization: AdminAuthorization
+}
+
+export interface AdminInitStatusData {
+  initialized: boolean
 }
 
 export interface AdminSessionState {
   user: AdminSessionUser | null
   roleCodes: string[]
-  permissions: AdminPermissionCode[]
+  permissions: AdminPermissionCodeBase[]
 }
-
-export interface AdminPageMeta {
-  title: string
-  description: string
-}
-
-export const AdminPageMetaByPath = {
-  "/admin/init": {
-    title: "初始化管理后台",
-    description: "创建首个超级管理员账号。",
-  },
-  "/admin/login": {
-    title: "登录后台",
-    description: "使用管理员账号进入后台。",
-  },
-  "/admin": {
-    title: "后台首页",
-    description: "查看当前登录身份与可访问模块。",
-  },
-  "/admin/users": {
-    title: "用户管理",
-    description: "创建、查看和维护后台账号。",
-  },
-  "/admin/roles": {
-    title: "角色管理",
-    description: "配置角色信息与后台页面权限。",
-  },
-  "/admin/login-logs": {
-    title: "登录日志",
-    description: "查看后台登录成功与失败记录。",
-  },
-  "/admin/audit-logs": {
-    title: "操作审计",
-    description: "查看后台关键操作审计记录。",
-  },
-} as const satisfies Record<string, AdminPageMeta>
 
 export interface AdminUserListItem extends AdminSessionUser {
   roles: AdminRoleSummary[]

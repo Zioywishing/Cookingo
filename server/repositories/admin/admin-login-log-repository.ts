@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm"
+import { count, desc, eq } from "drizzle-orm"
 
 import type { AdminDb } from "../../db/seed"
 import { adminLoginLog } from "../../db/schema"
@@ -10,8 +10,18 @@ export function createAdminLoginLog(
   db.insert(adminLoginLog).values(values).run()
 }
 
-export function listAdminLoginLogs(db: AdminDb) {
-  return db.select().from(adminLoginLog).orderBy(desc(adminLoginLog.createdAt)).all()
+export function countAdminLoginLogs(db: AdminDb) {
+  return db.select({ value: count() }).from(adminLoginLog).get()?.value || 0
+}
+
+export function listAdminLoginLogs(db: AdminDb, page: number, pageSize: number) {
+  return db
+    .select()
+    .from(adminLoginLog)
+    .orderBy(desc(adminLoginLog.createdAt))
+    .limit(pageSize)
+    .offset((page - 1) * pageSize)
+    .all()
 }
 
 export function listAdminLoginLogsByUserId(db: AdminDb, userId: string) {

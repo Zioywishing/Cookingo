@@ -1,39 +1,35 @@
 import {
   ADMIN_AUTH_INVALID,
+  ADMIN_ROLE_NOT_FOUND,
   ADMIN_USER_DUPLICATE_USERNAME,
   ADMIN_USER_NOT_FOUND,
 } from "../../utils/admin/error-codes"
+import {
+  ADMIN_DISABLED_USER_STATUS,
+} from "../../utils/admin/constants"
+import {
+  AdminAuditAction,
+  AdminAuditTargetType,
+  writeAdminAuditLog,
+} from "../../utils/admin/audit"
+import {
+  ADMIN_ROLE_NOT_FOUND_MESSAGE,
+  ADMIN_USER_DUPLICATE_USERNAME_MESSAGE,
+  ADMIN_USER_NOT_FOUND_MESSAGE,
+} from "../../utils/admin/error-messages"
 import { AdminDomainError } from "../../utils/admin/errors"
 import { createAdminId } from "../../utils/admin/id"
 import { hashAdminPassword } from "../../utils/admin/password"
 import { getNowIso } from "../../utils/admin/time"
-import { createAdminAuditLog } from "../../repositories/admin/admin-audit-log-repository"
+import {
+  createInitialAdminUserFields,
+  getNextAdminTokenVersion,
+} from "../../utils/admin/user-record"
 import { getAdminRolesByIds } from "../../repositories/admin/admin-role-repository"
 import { countAdminUsers, createAdminUserRecord, getAdminUserById, getAdminUserByUsername, getAdminUserRoles, listAdminUsers as listAdminUserRows, replaceAdminUserRoles, updateAdminUserFields } from "../../repositories/admin/admin-user-repository"
 
 import type { AdminDb } from "../../db/seed"
 import type { AdminUserStatus } from "~~/shared/types"
-
-function writeAuditLog(
-  db: AdminDb,
-  input: {
-    actorUserId: string
-    action: string
-    targetType: string
-    targetId: string
-    summary: string
-  },
-) {
-  createAdminAuditLog(db, {
-    id: createAdminId(),
-    actorUserId: input.actorUserId,
-    action: input.action,
-    targetType: input.targetType,
-    targetId: input.targetId,
-    summary: input.summary,
-    createdAt: getNowIso(),
-  })
-}
 
 export async function createAdminUser(
   db: AdminDb,
@@ -45,7 +41,7 @@ export async function createAdminUser(
   },
 ) {
   if (getAdminUserByUsername(db, input.username)) {
-    throw new AdminDomainError(ADMIN_USER_DUPLICATE_USERNAME, "username already exists")
+    throw new AdminDomainError(ADMIN_USER_DUPLICATE_USERNAME, ADMIN_USER_DUPLICATE_USERNAME_MESSAGE)
   }
 
   const now = getNowIso()
@@ -54,18 +50,13 @@ export async function createAdminUser(
     username: input.username,
     displayName: input.displayName,
     passwordHash: await hashAdminPassword(input.password),
-    status: "active",
-    tokenVersion: 1,
-    lastLoginAt: null,
-    passwordChangedAt: null,
-    createdAt: now,
-    updatedAt: now,
+    ...createInitialAdminUserFields(now),
   })
 
-  writeAuditLog(db, {
+  writeAdminAuditLog(db, {
     actorUserId: input.actorUserId,
-    action: "admin.user.create",
-    targetType: "admin_user",
+    action: AdminAuditAction.UserCreate,
+    targetType: AdminAuditTargetType.User,
     targetId: user.id,
     summary: `created admin user ${user.username}`,
   })
@@ -84,10 +75,16 @@ export async function assignAdminUserRoles(
   const user = getAdminUserById(db, input.targetUserId)
 
   if (!user) {
-    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, "user not found")
+    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, ADMIN_USER_NOT_FOUND_MESSAGE)
   }
 
-  const roles = getAdminRolesByIds(db, input.roleIds)
+  const roleIds = [...new Set(input.roleIds)]
+  const roles = getAdminRolesByIds(db, roleIds)
+
+  if (roles.length !== roleIds.length) {
+    throw new AdminDomainError(ADMIN_ROLE_NOT_FOUND, ADMIN_ROLE_NOT_FOUND_MESSAGE)
+  }
+
   const now = getNowIso()
 
   replaceAdminUserRoles(
@@ -101,12 +98,12 @@ export async function assignAdminUserRoles(
     })),
   )
 
-  writeAuditLog(db, {
+  writeAdminAuditLog(db, {
     actorUserId: input.actorUserId,
-    action: "admin.user.assign_roles",
-    targetType: "admin_user",
+    action: AdminAuditAction.UserAssignRoles,
+    targetType: AdminAuditTargetType.User,
     targetId: user.id,
-    summary: `assigned ${roles.length} roles`,
+    summary: `assigned ${roleIds.length} roles`,
   })
 }
 
@@ -121,22 +118,22 @@ export async function resetAdminUserPassword(
   const user = getAdminUserById(db, input.targetUserId)
 
   if (!user) {
-    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, "user not found")
+    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, ADMIN_USER_NOT_FOUND_MESSAGE)
   }
 
   const now = getNowIso()
 
   updateAdminUserFields(db, user.id, {
     passwordHash: await hashAdminPassword(input.newPassword),
-    tokenVersion: user.tokenVersion + 1,
+    tokenVersion: getNextAdminTokenVersion(user.tokenVersion),
     passwordChangedAt: now,
     updatedAt: now,
   })
 
-  writeAuditLog(db, {
+  writeAdminAuditLog(db, {
     actorUserId: input.actorUserId,
-    action: "admin.user.reset_password",
-    targetType: "admin_user",
+    action: AdminAuditAction.UserResetPassword,
+    targetType: AdminAuditTargetType.User,
     targetId: user.id,
     summary: `reset password for ${user.username}`,
   })
@@ -167,21 +164,23 @@ export async function setAdminUserStatus(
   const user = getAdminUserById(db, input.targetUserId)
 
   if (!user) {
-    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, "user not found")
+    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, ADMIN_USER_NOT_FOUND_MESSAGE)
   }
 
   const now = getNowIso()
 
   updateAdminUserFields(db, user.id, {
     status: input.status,
-    tokenVersion: input.status === "disabled" ? user.tokenVersion + 1 : user.tokenVersion,
+    tokenVersion: input.status === ADMIN_DISABLED_USER_STATUS
+      ? getNextAdminTokenVersion(user.tokenVersion)
+      : user.tokenVersion,
     updatedAt: now,
   })
 
-  writeAuditLog(db, {
+  writeAdminAuditLog(db, {
     actorUserId: input.actorUserId,
-    action: "admin.user.set_status",
-    targetType: "admin_user",
+    action: AdminAuditAction.UserSetStatus,
+    targetType: AdminAuditTargetType.User,
     targetId: user.id,
     summary: `set status to ${input.status}`,
   })
@@ -198,7 +197,7 @@ export async function updateAdminUserProfile(
   const user = getAdminUserById(db, input.targetUserId)
 
   if (!user) {
-    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, "user not found")
+    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, ADMIN_USER_NOT_FOUND_MESSAGE)
   }
 
   updateAdminUserFields(db, user.id, {
@@ -206,10 +205,10 @@ export async function updateAdminUserProfile(
     updatedAt: getNowIso(),
   })
 
-  writeAuditLog(db, {
+  writeAdminAuditLog(db, {
     actorUserId: input.actorUserId,
-    action: "admin.user.update_profile",
-    targetType: "admin_user",
+    action: AdminAuditAction.UserUpdateProfile,
+    targetType: AdminAuditTargetType.User,
     targetId: user.id,
     summary: `updated display name to ${input.displayName}`,
   })
@@ -224,7 +223,7 @@ export async function listAdminUsers(
 ) {
   return {
     items: listAdminUserRows(db, input.page, input.pageSize).map((user) => ({
-      ...user,
+      user,
       roles: getAdminUserRoles(db, user.id),
     })),
     total: countAdminUsers(db),
@@ -237,11 +236,11 @@ export async function getAdminUserDetail(db: AdminDb, userId: string) {
   const user = getAdminUserById(db, userId)
 
   if (!user) {
-    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, "user not found")
+    throw new AdminDomainError(ADMIN_USER_NOT_FOUND, ADMIN_USER_NOT_FOUND_MESSAGE)
   }
 
   return {
-    ...user,
+    user,
     roles: getAdminUserRoles(db, user.id),
   }
 }

@@ -4,11 +4,15 @@ import { ZodError } from "zod"
 
 import { failureResponse } from "../api-response"
 import { ADMIN_INTERNAL_ERROR, ADMIN_REQUEST_INVALID } from "./error-codes"
+import {
+  ADMIN_INTERNAL_ERROR_MESSAGE,
+  ADMIN_REQUEST_INVALID_MESSAGE,
+} from "./error-messages"
 import { isAdminDomainError } from "./errors"
 
 export function createAdminErrorResponse(error: unknown) {
   if (error instanceof ZodError) {
-    return failureResponse(ADMIN_REQUEST_INVALID, "request params invalid")
+    return failureResponse(ADMIN_REQUEST_INVALID, ADMIN_REQUEST_INVALID_MESSAGE)
   }
 
   if (isAdminDomainError(error)) {
@@ -16,7 +20,7 @@ export function createAdminErrorResponse(error: unknown) {
   }
 
   console.error(error)
-  return failureResponse(ADMIN_INTERNAL_ERROR, "admin internal error")
+  return failureResponse(ADMIN_INTERNAL_ERROR, ADMIN_INTERNAL_ERROR_MESSAGE)
 }
 
 export function defineAdminApiHandler<T>(

@@ -26,10 +26,20 @@ describe("admin frontend shell", () => {
   test("upgrades the admin layout to use a responsive sidebar shell", () => {
     const layout = readProjectFile("app/layouts/admin.vue")
     const mobileSidebar = readProjectFile("app/components/admin/shell/AdminMobileSidebar.vue")
+    const adminFonts = readProjectFile("app/assets/css/admin-fonts.css")
 
+    expect(layout).toContain("AdminShellAdminMessageCenter")
     expect(layout).toContain("AdminShellAdminSidebar")
     expect(layout).toContain("AdminShellAdminMobileSidebar")
     expect(layout).toContain("AdminShellAdminTopbar")
+    expect(layout).toContain("useAdminNavigation")
+    expect(layout).toContain("overflow-y: auto")
+    expect(layout).toContain("scrollbar-width: thin")
+    expect(layout).toContain('import "~/assets/css/admin-fonts.css"')
+    expect(layout).not.toContain("fonts.googleapis.com")
+    expect(adminFonts).toContain("@font-face")
+    expect(adminFonts).toContain("font-family: \"Inter\"")
+    expect(adminFonts).toContain("font-family: \"Playfair Display\"")
     expect(mobileSidebar).toContain("position: fixed")
   })
 
@@ -40,6 +50,14 @@ describe("admin frontend shell", () => {
     expect(layout).toContain("const currentUsername = computed(() => session.user.value?.username || \"guest\")")
     expect(layout).toContain(':display-name="currentDisplayName"')
     expect(layout).toContain(':username="currentUsername"')
+  })
+
+  test("captures runtime errors in the layout and routes them to the message center", () => {
+    const layout = readProjectFile("app/layouts/admin.vue")
+
+    expect(layout).toContain("useAdminMessageCenter")
+    expect(layout).toContain("onErrorCaptured((error)")
+    expect(layout).toContain("messageCenter.error(\"页面执行出现异常，请稍后重试\")")
   })
 
   test("uses generated component names for nested admin components", () => {

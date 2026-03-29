@@ -8,6 +8,14 @@ function getAdminRequestHeaders() {
   return import.meta.server ? useRequestHeaders(["cookie"]) : undefined
 }
 
+function unwrapAdminResponse<T>(response: ApiResponse<T>) {
+  if (response.code !== 0) {
+    throw new Error(response.msg || "请求失败，请稍后重试")
+  }
+
+  return response.data
+}
+
 export function useAdminLogs() {
   async function listLoginLogs(page = 1, pageSize = 20) {
     const response = await $fetch<ApiResponse<ApiPageData<AdminLoginLogItem>>>(
@@ -21,7 +29,7 @@ export function useAdminLogs() {
       },
     )
 
-    return response.data
+    return unwrapAdminResponse(response)
   }
 
   async function listAuditLogs(page = 1, pageSize = 20) {
@@ -36,7 +44,7 @@ export function useAdminLogs() {
       },
     )
 
-    return response.data
+    return unwrapAdminResponse(response)
   }
 
   return {

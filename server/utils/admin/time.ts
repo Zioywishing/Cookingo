@@ -1,3 +1,8 @@
+import {
+  ADMIN_MILLISECONDS_PER_DAY,
+  ADMIN_MILLISECONDS_PER_SECOND,
+} from "./constants"
+
 export function getNowIso() {
   return new Date().toISOString()
 }
@@ -11,7 +16,7 @@ export function getFutureDateIso(days: number) {
 }
 
 export function shouldRenewToken(expiresAtSeconds: number, renewBeforeDays: number, now = Date.now()) {
-  const renewBeforeMs = renewBeforeDays * 24 * 60 * 60 * 1000
+  const renewBeforeMs = renewBeforeDays * ADMIN_MILLISECONDS_PER_DAY
 
-  return expiresAtSeconds * 1000 - now < renewBeforeMs
+  return expiresAtSeconds * ADMIN_MILLISECONDS_PER_SECOND - now < renewBeforeMs
 }

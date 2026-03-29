@@ -39,24 +39,22 @@ function togglePermission(code: string) {
 </script>
 
 <template>
-  <section class="card">
-    <h3>角色详情</h3>
-    <div v-if="role" class="grid">
-      <label>
-        <span>角色名</span>
-        <input v-model="form.name" />
-      </label>
-      <label>
-        <span>角色编码</span>
-        <input :value="role.code" disabled />
-      </label>
-      <label>
-        <span>描述</span>
-        <input v-model="form.description" />
-      </label>
-    </div>
+  <div class="role-form">
+    <AdminBaseAdminSection title="角色信息" description="维护角色名称、编码与说明信息。">
+      <div v-if="role" class="grid">
+        <AdminBaseAdminField label="角色名">
+          <AdminBaseAdminInput v-model="form.name" />
+        </AdminBaseAdminField>
+        <AdminBaseAdminField label="角色编码">
+          <AdminBaseAdminInput :model-value="role.code" disabled />
+        </AdminBaseAdminField>
+        <AdminBaseAdminField label="描述">
+          <AdminBaseAdminInput v-model="form.description" />
+        </AdminBaseAdminField>
+      </div>
+    </AdminBaseAdminSection>
 
-    <div class="permissions">
+    <AdminBaseAdminSection title="页面权限" description="按权限组配置该角色可访问的后台能力。">
       <AdminRoleAdminPermissionGroup
         v-for="group in ['overview', 'iam', 'security']"
         :key="group"
@@ -65,40 +63,30 @@ function togglePermission(code: string) {
         :selected-codes="form.permissionCodes"
         @toggle="togglePermission"
       />
-    </div>
+    </AdminBaseAdminSection>
 
-    <button type="button" :disabled="pending" @click="emit('save', { ...form })">
-      {{ pending ? "保存中..." : "保存角色" }}
-    </button>
-  </section>
+    <div class="actions">
+      <AdminBaseAdminButton type="button" variant="primary" :loading="pending" @click="emit('save', { ...form })">
+        保存角色
+      </AdminBaseAdminButton>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.card {
-  padding: 24px;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.44);
+.role-form {
+  display: grid;
+  gap: 1rem;
 }
 
 .grid,
 .permissions {
   display: grid;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 0.9rem;
 }
 
-label {
-  display: grid;
-  gap: 6px;
-}
-
-input {
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  background: rgba(15, 23, 42, 0.56);
-  color: #f8fafc;
+.actions {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

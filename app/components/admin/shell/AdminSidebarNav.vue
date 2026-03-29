@@ -28,36 +28,46 @@ const route = useRoute()
 <style scoped>
 .admin-sidebar-nav {
   display: grid;
-  gap: 10px;
+  gap: 0.2rem;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  min-height: 46px;
-  padding: 0 16px;
-  border-radius: 16px;
-  color: rgba(226, 232, 240, 0.8);
+  min-height: 2.75rem;
+  padding: 0 1.5rem;
+  color: var(--admin-text-secondary, #4b5563);
   text-decoration: none;
-  background: rgba(15, 23, 42, 0.24);
+  background: transparent;
   border: 1px solid transparent;
   transition:
     background 160ms ease,
     border-color 160ms ease,
     color 160ms ease,
-    transform 160ms ease;
+    transform 160ms ease,
+    box-shadow 160ms ease;
+  position: relative;
 }
 
 .nav-link:hover,
 .nav-link:focus-visible {
-  color: #f8fafc;
-  border-color: rgba(148, 163, 184, 0.24);
+  color: var(--admin-accent, #9c27b0);
+  background: rgba(156, 39, 176, 0.03);
   transform: translateX(2px);
+  outline: none;
 }
 
 .nav-link.is-active {
-  color: #f8fafc;
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.24), rgba(59, 130, 246, 0.22));
-  border-color: rgba(125, 211, 252, 0.3);
+  color: var(--admin-accent, #9c27b0);
+  background: rgba(156, 39, 176, 0.05);
+}
+
+.nav-link.is-active::before {
+  content: "";
+  position: absolute;
+  inset: 20% auto 20% 0;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--admin-accent-gradient, linear-gradient(135deg, #e91e63 0%, #9c27b0 100%));
 }
 </style>

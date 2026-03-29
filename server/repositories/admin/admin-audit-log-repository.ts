@@ -1,4 +1,4 @@
-import { desc } from "drizzle-orm"
+import { count, desc } from "drizzle-orm"
 
 import type { AdminDb } from "../../db/seed"
 import { adminAuditLog } from "../../db/schema"
@@ -10,6 +10,16 @@ export function createAdminAuditLog(
   db.insert(adminAuditLog).values(values).run()
 }
 
-export function listAdminAuditLogs(db: AdminDb) {
-  return db.select().from(adminAuditLog).orderBy(desc(adminAuditLog.createdAt)).all()
+export function countAdminAuditLogs(db: AdminDb) {
+  return db.select({ value: count() }).from(adminAuditLog).get()?.value || 0
+}
+
+export function listAdminAuditLogs(db: AdminDb, page: number, pageSize: number) {
+  return db
+    .select()
+    .from(adminAuditLog)
+    .orderBy(desc(adminAuditLog.createdAt))
+    .limit(pageSize)
+    .offset((page - 1) * pageSize)
+    .all()
 }

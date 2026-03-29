@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { AdminPermissionCode } from "#shared/types/admin"
+import {
+  AdminNavigationSchema,
+  AdminPageMetaByPath,
+  AdminPermissionCode,
+} from "#shared/admin/domain"
+
+const pageMeta = AdminPageMetaByPath["/admin"]!
 
 definePageMeta({
   layout: 'admin',
   middleware: ["admin-init", "admin-auth"],
   adminPermission: AdminPermissionCode.Dashboard,
-  adminPageTitle: "后台首页",
-  adminPageDescription: "查看当前登录身份与可访问模块。",
+  adminPageTitle: pageMeta.title,
+  adminPageDescription: pageMeta.description,
 })
 
 const session = useAdminSession()
@@ -16,14 +22,14 @@ const currentUsername = computed(() => session.user.value?.username || "guest")
 const permissionCount = computed(() => session.permissions.value.length)
 
 const availableModules = computed(() => {
-  const modules = [
-    { title: "用户管理", path: "/admin/users", code: AdminPermissionCode.Users, description: "创建、授权和维护后台账号。" },
-    { title: "角色管理", path: "/admin/roles", code: AdminPermissionCode.Roles, description: "配置角色信息与后台页面权限。" },
-    { title: "登录日志", path: "/admin/login-logs", code: AdminPermissionCode.LoginLogs, description: "查看后台登录成功与失败记录。" },
-    { title: "操作审计", path: "/admin/audit-logs", code: AdminPermissionCode.AuditLogs, description: "查看后台关键行为审计记录。" },
-  ]
-
-  return modules.filter((item) => session.hasPermission(item.code))
+  return AdminNavigationSchema
+    .filter((item) => item.permission !== AdminPermissionCode.Dashboard)
+    .filter((item) => session.hasPermission(item.permission))
+    .map((item) => ({
+      title: item.title,
+      path: item.to,
+      description: item.description,
+    }))
 })
 </script>
 
@@ -31,86 +37,180 @@ const availableModules = computed(() => {
   <AdminShellAdminPageContainer>
     <AdminShellAdminPageHeader title="后台首页" description="当前为 IAM 一期后台底座，优先承载登录、权限、用户、角色与安全运维能力。" />
 
-    <section class="panel">
-      <div class="intro">
-        <h2>{{ currentDisplayName }}</h2>
-        <p class="description">
-          当前账号：{{ currentUsername }} · 当前拥有 {{ permissionCount }} 个页面权限。
+    <div class="stats-grid">
+      <AdminBaseAdminCard padding="md" title="Current Operator">
+        <p class="stat-value">
+          {{ currentDisplayName }}
         </p>
+        <p class="stat-meta">
+          账号：{{ currentUsername }}
+        </p>
+      </AdminBaseAdminCard>
+      <AdminBaseAdminCard padding="md" title="Page Permissions">
+        <p class="stat-value">
+          {{ permissionCount }}
+        </p>
+        <p class="stat-meta">
+          当前拥有的后台页面权限数
+        </p>
+      </AdminBaseAdminCard>
+      <AdminBaseAdminCard padding="md" title="Available Modules">
+        <p class="stat-value">
+          {{ availableModules.length }}
+        </p>
+        <p class="stat-meta">
+          当前账号可直接访问的管理模块
+        </p>
+      </AdminBaseAdminCard>
+    </div>
+
+    <AdminBaseAdminCard class="overview-card">
+      <div class="intro">
+        <div>
+          <p class="eyebrow">
+            Admin Overview
+          </p>
+          <h2>{{ currentDisplayName }}</h2>
+          <p class="description">
+            当前账号：{{ currentUsername }}。你可以从下方模块快速进入用户、角色与安全审计工作区。
+          </p>
+        </div>
+        <AdminBaseAdminBadge tone="neutral">
+          IAM Phase 1
+        </AdminBaseAdminBadge>
       </div>
 
       <div class="modules">
         <NuxtLink v-for="module in availableModules" :key="module.path" :to="module.path" class="module-card">
+          <span class="module-kicker">Module</span>
           <h3>{{ module.title }}</h3>
           <p>{{ module.description }}</p>
         </NuxtLink>
       </div>
-    </section>
+    </AdminBaseAdminCard>
   </AdminShellAdminPageContainer>
 </template>
 
 <style scoped>
-.panel {
-  padding: 32px;
-  border: 1px solid rgba(191, 219, 254, 0.2);
-  border-radius: 28px;
-  background: rgba(15, 23, 42, 0.52);
-  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.35);
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.stat-value {
+  margin: 0;
+  font-family: var(--admin-font-serif, "Georgia", serif);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--admin-text-primary, #111827);
+}
+
+.stat-meta {
+  margin: 0.35rem 0 0;
+  color: var(--admin-text-secondary, #4b5563);
+}
+
+.overview-card {
+  overflow: hidden;
 }
 
 .intro {
-  max-width: 720px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 h2 {
   margin: 0;
-  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-family: var(--admin-font-serif, "Georgia", serif);
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-weight: 600;
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--admin-text-tertiary, #9ca3af);
 }
 
 .description {
-  margin: 18px 0 0;
-  line-height: 1.8;
-  color: #cbd5e1;
+  margin: 0.8rem 0 0;
+  max-width: 42rem;
+  line-height: 1.7;
+  color: var(--admin-text-secondary, #4b5563);
 }
 
 .modules {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 32px;
+  gap: 1rem;
+  margin-top: 1.8rem;
 }
 
 .module-card {
   display: block;
-  padding: 20px;
-  border-radius: 22px;
-  background: rgba(30, 41, 59, 0.68);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--admin-border-subtle, #f3f4f6);
+  background: linear-gradient(180deg, #fff, #fcfcfd);
   text-decoration: none;
   color: inherit;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.module-card:hover,
+.module-card:focus-visible {
+  border-color: rgba(156, 39, 176, 0.18);
+  box-shadow: 0 16px 36px rgba(17, 24, 39, 0.06);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.module-kicker {
+  display: inline-flex;
+  margin-bottom: 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-text-tertiary, #9ca3af);
 }
 
 h3 {
-  margin: 0 0 10px;
+  margin: 0 0 0.45rem;
   font-size: 1.02rem;
+  color: var(--admin-text-primary, #111827);
 }
 
 .module-card p {
   margin: 0;
   line-height: 1.7;
-  color: #cbd5e1;
+  color: var(--admin-text-secondary, #4b5563);
 }
 
-@media (max-width: 820px) {
+@media (max-width: 960px) {
+  .stats-grid,
   .modules {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .panel {
-    padding: 22px 18px;
-    border-radius: 22px;
+  .stats-grid,
+  .modules {
+    grid-template-columns: 1fr;
+  }
+
+  .intro {
+    flex-direction: column;
   }
 }
 </style>

@@ -8,61 +8,47 @@ defineProps<{
 </script>
 
 <template>
-  <section class="table-card">
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>用户名</th>
-            <th>结果</th>
-            <th>原因</th>
-            <th>IP</th>
-            <th>userAgent</th>
-            <th>时间</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="pending">
-            <td colspan="6">
-              加载中...
-            </td>
-          </tr>
-          <tr v-for="item in items" :key="item.id">
-            <td>{{ item.username }}</td>
-            <td>{{ item.result }}</td>
-            <td>{{ item.reason || "-" }}</td>
-            <td>{{ item.ip || "-" }}</td>
-            <td>{{ item.userAgent || "-" }}</td>
-            <td>{{ item.createdAt }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  <AdminBaseAdminTable
+    :col-count="6"
+    :empty="!items.length"
+    :pending="pending"
+    empty-title="暂无登录日志"
+    empty-description="管理员登录成功与失败记录会展示在这里。"
+  >
+    <template #head>
+      <tr>
+        <th>用户名</th>
+        <th>结果</th>
+        <th>原因</th>
+        <th>IP</th>
+        <th>User Agent</th>
+        <th>时间</th>
+      </tr>
+    </template>
+
+    <tr v-for="item in items" :key="item.id">
+      <td class="cell-strong">{{ item.username }}</td>
+      <td>
+        <AdminBaseAdminBadge :tone="item.result === 'success' ? 'success' : 'danger'">
+          {{ item.result }}
+        </AdminBaseAdminBadge>
+      </td>
+      <td>{{ item.reason || "-" }}</td>
+      <td>{{ item.ip || "-" }}</td>
+      <td class="cell-wrap">{{ item.userAgent || "-" }}</td>
+      <td>{{ item.createdAt }}</td>
+    </tr>
+  </AdminBaseAdminTable>
 </template>
 
 <style scoped>
-.table-card {
-  padding: 18px;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.44);
+.cell-strong {
+  font-weight: 600;
+  color: var(--admin-text-primary, #111827);
 }
 
-.table-scroll {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 860px;
-}
-
-th,
-td {
-  padding: 14px 10px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-  text-align: left;
+.cell-wrap {
+  max-width: 22rem;
+  word-break: break-word;
 }
 </style>

@@ -3,14 +3,16 @@ import { z } from "zod"
 
 import { useAdminDb } from "../../../db/client"
 import { loginAdmin } from "../../../services/admin/admin-auth-service"
+import { adminNonEmptyStringSchema } from "../../../utils/admin/schemas"
 import { defineAdminApiHandler, getRequestMeta } from "../../../utils/admin/api-handler"
-import { writeAdminSessionCookie } from "../../../utils/auth/cookie"
+import { serializeAdminSessionPayload } from "../../../utils/admin/contracts"
+import { shouldUseSecureAdminSessionCookie, writeAdminSessionCookie } from "../../../utils/auth/cookie"
 import { signAdminJwt } from "../../../utils/auth/jwt"
 import { successResponse } from "../../../utils/api-response"
 
 const loginSchema = z.object({
-  username: z.string().min(1),
-  password: z.string().min(1),
+  username: adminNonEmptyStringSchema,
+  password: adminNonEmptyStringSchema,
 })
 
 export default defineAdminApiHandler(async (event) => {
@@ -27,11 +29,8 @@ export default defineAdminApiHandler(async (event) => {
 
   writeAdminSessionCookie(event, runtimeConfig.adminJwtCookieName, token, {
     ttlDays: runtimeConfig.adminJwtTtlDays,
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureAdminSessionCookie(),
   })
 
-  return successResponse({
-    user: result.user,
-    authorization: result.authorization,
-  })
+  return successResponse(serializeAdminSessionPayload(result))
 })

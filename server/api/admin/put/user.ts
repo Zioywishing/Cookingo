@@ -1,19 +1,22 @@
 import { readBody } from "h3"
 import { z } from "zod"
 
+import { AdminPermissionCode } from "~~/shared/admin/domain"
+
 import { useAdminDb } from "../../../db/client"
 import { updateAdminUserProfile } from "../../../services/admin/admin-user-service"
+import { adminIdSchema, adminNonEmptyStringSchema } from "../../../utils/admin/schemas"
 import { defineAdminApiHandler } from "../../../utils/admin/api-handler"
 import { requireAdminPermission } from "../../../utils/auth/admin-session"
 import { successResponse } from "../../../utils/api-response"
 
 const updateUserSchema = z.object({
-  id: z.string().min(1),
-  displayName: z.string().min(1),
+  id: adminIdSchema,
+  displayName: adminNonEmptyStringSchema,
 })
 
 export default defineAdminApiHandler(async (event) => {
-  const session = await requireAdminPermission(event, "admin.users")
+  const session = await requireAdminPermission(event, AdminPermissionCode.Users)
   const body = updateUserSchema.parse(await readBody(event))
 
   await updateAdminUserProfile(useAdminDb(), {

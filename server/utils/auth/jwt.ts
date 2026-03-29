@@ -1,5 +1,7 @@
 import { jwtVerify, SignJWT } from "jose"
 
+import { ADMIN_JWT_ALGORITHM } from "../admin/constants"
+import { ADMIN_JWT_SECRET_REQUIRED_MESSAGE } from "../admin/error-messages"
 import { shouldRenewToken } from "../admin/time"
 
 export interface AdminJwtPayload {
@@ -12,7 +14,7 @@ export interface AdminJwtPayload {
 
 function getJwtSecret(secret: string) {
   if (!secret) {
-    throw new Error("admin jwt secret is required")
+    throw new Error(ADMIN_JWT_SECRET_REQUIRED_MESSAGE)
   }
 
   return new TextEncoder().encode(secret)
@@ -29,7 +31,7 @@ export async function signAdminJwt(
     username: payload.username,
     tokenVersion: payload.tokenVersion,
   })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: ADMIN_JWT_ALGORITHM })
     .setSubject(payload.sub)
     .setIssuedAt()
     .setExpirationTime(`${options.ttlDays}d`)
@@ -41,7 +43,7 @@ export async function verifyAdminJwt(
   options: { secret: string },
 ): Promise<AdminJwtPayload> {
   const result = await jwtVerify(token, getJwtSecret(options.secret), {
-    algorithms: ["HS256"],
+    algorithms: [ADMIN_JWT_ALGORITHM],
   })
 
   return {

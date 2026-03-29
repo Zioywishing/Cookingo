@@ -1,34 +1,33 @@
 import type {
+  AdminAuthorization,
   AdminPageMeta,
   AdminPermissionCode,
+  AdminSessionPayload,
   AdminSessionUser,
 } from "#shared/types/admin"
 import type { ApiResponse } from "#shared/types/api"
-import { AdminPageMetaByPath, AdminPermissionCode as AdminPermissionCodeMap } from "#shared/types/admin"
-
-type AdminSessionApiPayload = {
-  user: {
-    id: string
-    username: string
-    displayName: string
-    status: AdminSessionUser["status"]
-  }
-  authorization: {
-    roleCodes: string[]
-    permissions: AdminPermissionCode[]
-  }
-}
+import {
+  AdminPermissionRouteEntries,
+  resolveAdminPageMeta,
+} from "#shared/admin/domain"
 
 function getAdminRequestHeaders() {
   return import.meta.server ? useRequestHeaders(["cookie"]) : undefined
 }
 
-function normalizeAdminSessionUser(payload: AdminSessionApiPayload["user"]): AdminSessionUser {
+function normalizeAdminSessionUser(payload: AdminSessionPayload["user"]): AdminSessionUser {
   return {
     id: payload.id,
     username: payload.username,
     displayName: payload.displayName,
     status: payload.status,
+  }
+}
+
+function normalizeAdminAuthorization(payload: AdminSessionPayload["authorization"]): AdminAuthorization {
+  return {
+    roleCodes: payload.roleCodes,
+    permissions: payload.permissions,
   }
 }
 
@@ -39,10 +38,11 @@ export function useAdminSession() {
   const loaded = useState("admin-session-loaded", () => false)
   const pending = useState("admin-session-pending", () => false)
 
-  function applySessionPayload(payload: AdminSessionApiPayload) {
+  function applySessionPayload(payload: AdminSessionPayload) {
     user.value = normalizeAdminSessionUser(payload.user)
-    roleCodes.value = payload.authorization.roleCodes
-    permissions.value = payload.authorization.permissions
+    const authorization = normalizeAdminAuthorization(payload.authorization)
+    roleCodes.value = authorization.roleCodes
+    permissions.value = authorization.permissions
     loaded.value = true
   }
 
@@ -65,7 +65,7 @@ export function useAdminSession() {
     pending.value = true
 
     try {
-      const response = await $fetch<ApiResponse<AdminSessionApiPayload>>(
+      const response = await $fetch<ApiResponse<AdminSessionPayload>>(
         "/api/admin/get/currentUser",
         {
           headers: getAdminRequestHeaders(),
@@ -92,7 +92,7 @@ export function useAdminSession() {
   }
 
   async function login(username: string, password: string) {
-    const response = await $fetch<ApiResponse<AdminSessionApiPayload>>(
+    const response = await $fetch<ApiResponse<AdminSessionPayload>>(
       "/api/admin/post/login",
       {
         method: "POST",
@@ -124,33 +124,11 @@ export function useAdminSession() {
   }
 
   function resolveHomePath() {
-    const routeOrder = [
-      { code: AdminPermissionCodeMap.Dashboard, path: "/admin" },
-      { code: AdminPermissionCodeMap.Users, path: "/admin/users" },
-      { code: AdminPermissionCodeMap.Roles, path: "/admin/roles" },
-      { code: AdminPermissionCodeMap.LoginLogs, path: "/admin/login-logs" },
-      { code: AdminPermissionCodeMap.AuditLogs, path: "/admin/audit-logs" },
-    ]
-
-    return routeOrder.find((item) => hasPermission(item.code))?.path || "/admin/login"
+    return AdminPermissionRouteEntries.find((item) => hasPermission(item.code))?.path || "/admin/login"
   }
 
   function resolvePageMeta(path: string): AdminPageMeta {
-    if (path.startsWith("/admin/users/")) {
-      return {
-        title: "用户详情",
-        description: "查看并维护后台用户信息、角色和安全设置。",
-      }
-    }
-
-    if (path.startsWith("/admin/roles/")) {
-      return {
-        title: "角色详情",
-        description: "编辑角色信息并配置后台页面权限。",
-      }
-    }
-
-    return AdminPageMetaByPath[path] || AdminPageMetaByPath["/admin"]
+    return resolveAdminPageMeta(path)
   }
 
   return {

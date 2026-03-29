@@ -1,7 +1,5 @@
 <script setup lang="ts">
 defineProps<{
-  title: string
-  description: string
   displayName: string
   username: string
 }>()
@@ -14,17 +12,16 @@ defineEmits<{
 
 <template>
   <header class="admin-topbar">
-    <div class="title-block">
+    <div class="left-block">
       <button class="menu-button" type="button" aria-label="Open menu" @click="$emit('toggle-menu')">
         菜单
       </button>
-      <div>
-        <p class="eyebrow">Cookingo Admin</p>
-        <h1>{{ title }}</h1>
-        <p class="description">
-          {{ description }}
-        </p>
-      </div>
+      <NuxtLink class="brand" to="/admin">
+        <div class="brand-mark">
+          C
+        </div>
+        <span class="brand-name">Cookingo-Admin</span>
+      </NuxtLink>
     </div>
 
     <div class="user-block">
@@ -32,9 +29,9 @@ defineEmits<{
         <strong>{{ displayName }}</strong>
         <span>{{ username }}</span>
       </div>
-      <button class="logout-button" type="button" @click="$emit('logout')">
+      <AdminBaseAdminButton size="sm" variant="ghost" @click="$emit('logout')">
         退出
-      </button>
+      </AdminBaseAdminButton>
     </div>
   </header>
 </template>
@@ -42,80 +39,78 @@ defineEmits<{
 <style scoped>
 .admin-topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 18px;
-  padding: 24px 28px;
-  border: 1px solid rgba(191, 219, 254, 0.16);
-  border-radius: 28px;
-  background: rgba(15, 23, 42, 0.52);
-  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.28);
+  gap: 1rem;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid var(--admin-border-subtle, #f3f4f6);
+  background: var(--admin-bg-surface, #fff);
 }
 
-.title-block {
+.left-block {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--admin-text-primary, #111827);
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: linear-gradient(#fff, #fff) padding-box, var(--admin-accent-gradient, linear-gradient(135deg, #e91e63 0%, #9c27b0 100%)) border-box;
+  font-family: var(--admin-font-serif, "Georgia", serif);
+  font-size: 1rem;
+  color: var(--admin-accent, #9c27b0);
+}
+
+.brand-name {
+  font-family: var(--admin-font-serif, "Georgia", serif);
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .menu-button {
   display: none;
-  min-height: 40px;
-  padding: 0 14px;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.48);
-  color: #f8fafc;
-}
-
-.eyebrow {
-  margin: 0 0 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #93c5fd;
-}
-
-h1 {
-  margin: 0;
-  font-size: clamp(1.55rem, 4vw, 2.4rem);
-}
-
-.description {
-  margin: 12px 0 0;
-  line-height: 1.7;
-  color: #cbd5e1;
+  border: 1px solid var(--admin-border-medium, #e5e7eb);
+  background: transparent;
+  color: var(--admin-text-primary, #111827);
 }
 
 .user-block {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 0.9rem;
 }
 
 .identity {
   display: grid;
-  gap: 4px;
+  gap: 0.1rem;
   text-align: right;
 }
 
 .identity strong {
-  font-size: 0.98rem;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .identity span {
-  color: #cbd5e1;
-}
-
-.logout-button {
-  min-height: 42px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.48);
-  color: #f8fafc;
+  font-size: 0.72rem;
+  color: var(--admin-text-tertiary, #9ca3af);
 }
 
 @media (max-width: 920px) {
@@ -124,25 +119,17 @@ h1 {
     align-items: center;
     justify-content: center;
   }
+
+  .brand-name {
+    font-size: 1rem;
+  }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 640px) {
   .admin-topbar {
-    flex-direction: column;
-    padding: 20px 18px;
+    padding: 0 1rem;
   }
 
-  .user-block {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .identity {
-    text-align: left;
-  }
-}
-
-@media (max-width: 520px) {
   .identity span {
     display: none;
   }

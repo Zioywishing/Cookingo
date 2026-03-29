@@ -1,11 +1,14 @@
 <script setup lang="ts">
-interface AdminNavItem {
-  title: string
-  to: string
+interface AdminNavItemGroup {
+  label: string
+  items: {
+    title: string
+    to: string
+  }[]
 }
 
 const props = defineProps<{
-  items: AdminNavItem[]
+  groups: AdminNavItemGroup[]
   open: boolean
 }>()
 
@@ -55,13 +58,17 @@ if (import.meta.client) {
       <button class="mobile-sidebar-backdrop" type="button" aria-label="Close menu" @click="emit('close')" />
       <aside class="mobile-sidebar-panel">
         <div class="panel-head">
-          <p class="eyebrow">Cookingo Admin</p>
-          <button class="close-button" type="button" @click="emit('close')">
+          <AdminBaseAdminButton size="sm" variant="ghost" @click="emit('close')">
             关闭
-          </button>
+          </AdminBaseAdminButton>
         </div>
 
-        <AdminShellAdminSidebarNav :items="items" />
+        <section v-for="group in groups" :key="group.label" class="nav-group">
+          <p class="nav-label">
+            {{ group.label }}
+          </p>
+          <AdminShellAdminSidebarNav :items="group.items" />
+        </section>
       </aside>
     </div>
   </Teleport>
@@ -87,37 +94,68 @@ if (import.meta.client) {
   left: 0;
   bottom: 0;
   width: min(82vw, 320px);
-  padding: 26px 18px;
-  background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.92));
-  border-right: 1px solid rgba(148, 163, 184, 0.22);
-  box-shadow: 0 24px 80px rgba(2, 6, 23, 0.42);
+  padding: 1.25rem 0;
+  background: var(--admin-bg-surface, #fff);
+  border-right: 1px solid var(--admin-border-subtle, #f3f4f6);
+  box-shadow: 0 24px 80px rgba(17, 24, 39, 0.18);
 }
 
 .panel-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 24px;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .eyebrow {
-  margin: 0;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
+  margin: 0 0 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #7dd3fc;
+  color: var(--admin-text-tertiary, #9ca3af);
 }
 
-.close-button {
-  min-height: 38px;
-  padding: 0 14px;
+h2 {
+  margin: 0;
+  font-family: var(--admin-font-serif, "Georgia", serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.48);
-  color: #f8fafc;
+  border: 1px solid transparent;
+  background: linear-gradient(#fff, #fff) padding-box, var(--admin-accent-gradient, linear-gradient(135deg, #e91e63 0%, #9c27b0 100%)) border-box;
+  font-family: var(--admin-font-serif, "Georgia", serif);
+  color: var(--admin-accent, #9c27b0);
+}
+
+.nav-group + .nav-group {
+  margin-top: 0.9rem;
+}
+
+.nav-label {
+  margin: 0 0 0.65rem;
+  padding: 0 1rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--admin-text-tertiary, #9ca3af);
 }
 
 @media (min-width: 921px) {

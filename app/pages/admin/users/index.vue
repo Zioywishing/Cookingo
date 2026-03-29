@@ -1,24 +1,37 @@
 <script setup lang="ts">
-import { AdminPermissionCode } from "#shared/types/admin"
+import { AdminPageMetaByPath, AdminPermissionCode } from "#shared/admin/domain"
+
+const pageMeta = AdminPageMetaByPath["/admin/users"]!
+const feedback = useAdminRequestFeedback()
+const emptyUsersPage = {
+  items: [],
+  total: 0,
+  page: 1,
+  pageSize: 20,
+}
 
 definePageMeta({
   layout: "admin",
   middleware: ["admin-init", "admin-auth"],
   adminPermission: AdminPermissionCode.Users,
-  adminPageTitle: "用户管理",
-  adminPageDescription: "创建、查看和维护后台账号。",
+  adminPageTitle: pageMeta.title,
+  adminPageDescription: pageMeta.description,
 })
 
 const usersApi = useAdminUsers()
 const createOpen = ref(false)
 const createPending = ref(false)
-const createErrorMessage = ref("")
 
 const {
   data: pageData,
   pending,
   refresh,
-} = await useAsyncData("admin-users-page", () => usersApi.listUsers())
+} = await useAsyncData("admin-users-page", () =>
+  feedback.load(() => usersApi.listUsers(), {
+    errorMessage: "加载用户列表失败",
+    fallback: emptyUsersPage,
+  }),
+)
 
 async function handleCreateUser(payload: {
   username: string
@@ -26,12 +39,13 @@ async function handleCreateUser(payload: {
   password: string
 }) {
   createPending.value = true
-  createErrorMessage.value = ""
-  const response = await usersApi.createUser(payload)
+  const response = await feedback.run(() => usersApi.createUser(payload), {
+    successMessage: "用户创建成功",
+    errorMessage: "创建用户失败",
+  })
   createPending.value = false
 
-  if (response.code !== 0) {
-    createErrorMessage.value = response.msg
+  if (!response) {
     return
   }
 
@@ -44,27 +58,19 @@ async function handleCreateUser(payload: {
   <AdminShellAdminPageContainer>
     <AdminShellAdminPageHeader title="用户管理" description="创建、查看和维护后台账号。" />
 
-    <div class="toolbar">
-      <button type="button" @click="createOpen = true">
+    <AdminBaseAdminToolbar>
+      <AdminBaseAdminButton type="button" variant="primary" @click="createOpen = true">
         新建用户
-      </button>
-    </div>
+      </AdminBaseAdminButton>
+    </AdminBaseAdminToolbar>
 
     <AdminUserTable :items="pageData?.items || []" :pending="pending" />
 
     <AdminUserCreateDialog
       :open="createOpen"
       :pending="createPending"
-      :error-message="createErrorMessage"
       @close="createOpen = false"
       @submit="handleCreateUser"
     />
   </AdminShellAdminPageContainer>
 </template>
-
-<style scoped>
-.toolbar {
-  display: flex;
-  justify-content: flex-end;
-}
-</style>

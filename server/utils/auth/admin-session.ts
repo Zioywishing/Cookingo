@@ -3,8 +3,16 @@ import type { H3Event } from "h3"
 import { useAdminDb } from "../../db/client"
 import { authenticateAdminSession } from "../../services/admin/admin-auth-service"
 import { ADMIN_AUTH_INVALID, ADMIN_PERMISSION_DENIED } from "../admin/error-codes"
+import {
+  ADMIN_AUTH_INVALID_MESSAGE,
+  ADMIN_PERMISSION_DENIED_MESSAGE,
+} from "../admin/error-messages"
 import { AdminDomainError } from "../admin/errors"
-import { readAdminSessionCookie, writeAdminSessionCookie } from "./cookie"
+import {
+  readAdminSessionCookie,
+  shouldUseSecureAdminSessionCookie,
+  writeAdminSessionCookie,
+} from "./cookie"
 import { shouldRenewAdminSession, signAdminJwt, verifyAdminJwt } from "./jwt"
 
 export async function requireAdminAuth(event: H3Event) {
@@ -16,7 +24,7 @@ export async function requireAdminAuth(event: H3Event) {
   const token = readAdminSessionCookie(event, runtimeConfig.adminJwtCookieName)
 
   if (!token) {
-    throw new AdminDomainError(ADMIN_AUTH_INVALID, "session invalid")
+    throw new AdminDomainError(ADMIN_AUTH_INVALID, ADMIN_AUTH_INVALID_MESSAGE)
   }
 
   const tokenPayload = await verifyAdminJwt(token, {
@@ -50,7 +58,7 @@ export async function requireAdminAuth(event: H3Event) {
       renewedToken,
       {
         ttlDays: runtimeConfig.adminJwtTtlDays,
-        secure: process.env.NODE_ENV === "production",
+        secure: shouldUseSecureAdminSessionCookie(),
       },
     )
   }
@@ -63,7 +71,7 @@ export async function requireAdminPermission(event: H3Event, permissionCode: str
   const session = await requireAdminAuth(event)
 
   if (!session.authorization.permissions.includes(permissionCode)) {
-    throw new AdminDomainError(ADMIN_PERMISSION_DENIED, "no target page permission")
+    throw new AdminDomainError(ADMIN_PERMISSION_DENIED, ADMIN_PERMISSION_DENIED_MESSAGE)
   }
 
   return session

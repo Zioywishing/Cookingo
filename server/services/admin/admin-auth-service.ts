@@ -3,6 +3,16 @@ import {
   ADMIN_AUTH_DISABLED,
   ADMIN_AUTH_INVALID,
 } from "../../utils/admin/error-codes"
+import {
+  ADMIN_ACTIVE_USER_STATUS,
+  AdminLoginReason,
+  AdminLoginResult,
+} from "../../utils/admin/constants"
+import {
+  ADMIN_AUTH_BAD_CREDENTIALS_MESSAGE,
+  ADMIN_AUTH_DISABLED_MESSAGE,
+  ADMIN_AUTH_INVALID_MESSAGE,
+} from "../../utils/admin/error-messages"
 import { AdminDomainError } from "../../utils/admin/errors"
 import { createAdminId } from "../../utils/admin/id"
 import { verifyAdminPassword } from "../../utils/admin/password"
@@ -20,7 +30,7 @@ async function writeLoginAttempt(
   input: {
     username: string
     userId?: string | null
-    result: "success" | "failure"
+    result: (typeof AdminLoginResult)[keyof typeof AdminLoginResult]
     reason?: string | null
     ip?: string | null
     userAgent?: string | null
@@ -78,29 +88,29 @@ export async function loginAdmin(
   if (!user) {
     await writeLoginAttempt(db, {
       username: input.username,
-      result: "failure",
-      reason: "bad_credentials",
+      result: AdminLoginResult.Failure,
+      reason: AdminLoginReason.BadCredentials,
       ip: input.ip,
       userAgent: input.userAgent,
     })
 
     throw new AdminDomainError(
       ADMIN_AUTH_BAD_CREDENTIALS,
-      "username or password incorrect",
+      ADMIN_AUTH_BAD_CREDENTIALS_MESSAGE,
     )
   }
 
-  if (user.status !== "active") {
+  if (user.status !== ADMIN_ACTIVE_USER_STATUS) {
     await writeLoginAttempt(db, {
       username: input.username,
       userId: user.id,
-      result: "failure",
-      reason: "disabled",
+      result: AdminLoginResult.Failure,
+      reason: AdminLoginReason.Disabled,
       ip: input.ip,
       userAgent: input.userAgent,
     })
 
-    throw new AdminDomainError(ADMIN_AUTH_DISABLED, "account disabled")
+    throw new AdminDomainError(ADMIN_AUTH_DISABLED, ADMIN_AUTH_DISABLED_MESSAGE)
   }
 
   const passwordValid = await verifyAdminPassword(input.password, user.passwordHash)
@@ -109,15 +119,15 @@ export async function loginAdmin(
     await writeLoginAttempt(db, {
       username: input.username,
       userId: user.id,
-      result: "failure",
-      reason: "bad_credentials",
+      result: AdminLoginResult.Failure,
+      reason: AdminLoginReason.BadCredentials,
       ip: input.ip,
       userAgent: input.userAgent,
     })
 
     throw new AdminDomainError(
       ADMIN_AUTH_BAD_CREDENTIALS,
-      "username or password incorrect",
+      ADMIN_AUTH_BAD_CREDENTIALS_MESSAGE,
     )
   }
 
@@ -129,7 +139,7 @@ export async function loginAdmin(
   await writeLoginAttempt(db, {
     username: input.username,
     userId: user.id,
-    result: "success",
+    result: AdminLoginResult.Success,
     reason: null,
     ip: input.ip,
     userAgent: input.userAgent,
@@ -151,8 +161,8 @@ export async function loginAdmin(
 export async function authenticateAdminSession(db: AdminDb, tokenPayload: AdminJwtPayload) {
   const user = getAdminUserById(db, tokenPayload.sub)
 
-  if (!user || user.status !== "active" || user.tokenVersion !== tokenPayload.tokenVersion) {
-    throw new AdminDomainError(ADMIN_AUTH_INVALID, "session invalid")
+  if (!user || user.status !== ADMIN_ACTIVE_USER_STATUS || user.tokenVersion !== tokenPayload.tokenVersion) {
+    throw new AdminDomainError(ADMIN_AUTH_INVALID, ADMIN_AUTH_INVALID_MESSAGE)
   }
 
   const authorization = await getAdminUserAuthorization(db, user.id)

@@ -1,4 +1,4 @@
-import type { AdminPermissionCode } from "#shared/types/admin"
+import type { AdminPermissionCode } from "#shared/admin/domain"
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (!to.path.startsWith("/admin") || to.path === "/admin/init" || to.path === "/admin/login") {

@@ -3,12 +3,13 @@ import { z } from "zod"
 
 import { useAdminDb } from "../../../db/client"
 import { defineAdminApiHandler } from "../../../utils/admin/api-handler"
+import { adminPasswordSchema } from "../../../utils/admin/schemas"
 import { requireAdminAuth } from "../../../utils/auth/admin-session"
 import { successResponse } from "../../../utils/api-response"
 import { changeOwnAdminPassword } from "../../../services/admin/admin-user-service"
 
 const changePasswordSchema = z.object({
-  newPassword: z.string().min(8),
+  newPassword: adminPasswordSchema,
 })
 
 export default defineAdminApiHandler(async (event) => {

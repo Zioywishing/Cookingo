@@ -4,37 +4,31 @@ import {
   ADMIN_ROLE_IN_USE,
   ADMIN_ROLE_NOT_FOUND,
 } from "../../utils/admin/error-codes"
+import {
+  ADMIN_FIRST_PAGE,
+  ADMIN_ROLE_OPTIONS_FALLBACK_PAGE_SIZE,
+} from "../../utils/admin/constants"
+import {
+  AdminAuditAction,
+  AdminAuditTargetType,
+  writeAdminAuditLog,
+} from "../../utils/admin/audit"
+import {
+  ADMIN_PERMISSION_NOT_FOUND_MESSAGE,
+  ADMIN_ROLE_DUPLICATE_CODE_MESSAGE,
+  ADMIN_ROLE_IN_USE_MESSAGE,
+  ADMIN_ROLE_NOT_FOUND_MESSAGE,
+  ADMIN_ROLE_SYSTEM_DELETE_MESSAGE,
+} from "../../utils/admin/error-messages"
 import { AdminDomainError } from "../../utils/admin/errors"
 import { createAdminId } from "../../utils/admin/id"
 import { ROOT_ROLE_CODE } from "../../utils/admin/permissions"
 import { getNowIso } from "../../utils/admin/time"
-import { createAdminAuditLog } from "../../repositories/admin/admin-audit-log-repository"
 import { getAdminPermissionsByCodes, listAdminPermissions } from "../../repositories/admin/admin-permission-repository"
 import { countAdminRoles, createAdminRoleRecord, deleteAdminRoleRecord, getAdminPermissionsForRoleId, getAdminRoleByCode, getAdminRoleById, listAdminRoles as listRoleRows, replaceAdminRolePermissions, updateAdminRoleFields } from "../../repositories/admin/admin-role-repository"
 import { getUsersByRoleId } from "../../repositories/admin/admin-user-repository"
 
 import type { AdminDb } from "../../db/seed"
-
-function writeAuditLog(
-  db: AdminDb,
-  input: {
-    actorUserId: string
-    action: string
-    targetType: string
-    targetId: string
-    summary: string
-  },
-) {
-  createAdminAuditLog(db, {
-    id: createAdminId(),
-    actorUserId: input.actorUserId,
-    action: input.action,
-    targetType: input.targetType,
-    targetId: input.targetId,
-    summary: input.summary,
-    createdAt: getNowIso(),
-  })
-}
 
 function mapRolePermissions(
   roleId: string,
@@ -61,13 +55,13 @@ export async function createAdminRole(
   },
 ) {
   if (getAdminRoleByCode(db, input.code)) {
-    throw new AdminDomainError(ADMIN_ROLE_DUPLICATE_CODE, "role code already exists")
+    throw new AdminDomainError(ADMIN_ROLE_DUPLICATE_CODE, ADMIN_ROLE_DUPLICATE_CODE_MESSAGE)
   }
 
   const permissions = getAdminPermissionsByCodes(db, input.permissionCodes)
 
   if (permissions.length !== input.permissionCodes.length) {
-    throw new AdminDomainError(ADMIN_PERMISSION_NOT_FOUND, "permission not found")
+    throw new AdminDomainError(ADMIN_PERMISSION_NOT_FOUND, ADMIN_PERMISSION_NOT_FOUND_MESSAGE)
   }
 
   const now = getNowIso()
@@ -90,10 +84,10 @@ export async function createAdminRole(
     ),
   )
 
-  writeAuditLog(db, {
+  writeAdminAuditLog(db, {
     actorUserId: input.actorUserId,
-    action: "admin.role.create",
-    targetType: "admin_role",
+    action: AdminAuditAction.RoleCreate,
+    targetType: AdminAuditTargetType.Role,
     targetId: role.id,
     summary: `created role ${role.code}`,
   })
@@ -114,13 +108,13 @@ export async function updateAdminRole(
   const role = getAdminRoleById(db, input.roleId)
 
   if (!role) {
-    throw new AdminDomainError(ADMIN_ROLE_NOT_FOUND, "role not found")
+    throw new AdminDomainError(ADMIN_ROLE_NOT_FOUND, ADMIN_ROLE_NOT_FOUND_MESSAGE)
   }
 
   const permissions = getAdminPermissionsByCodes(db, input.permissionCodes)
 
   if (permissions.length !== input.permissionCodes.length) {
-    throw new AdminDomainError(ADMIN_PERMISSION_NOT_FOUND, "permission not found")
+    throw new AdminDomainError(ADMIN_PERMISSION_NOT_FOUND, ADMIN_PERMISSION_NOT_FOUND_MESSAGE)
   }
 
   updateAdminRoleFields(db, role.id, {
@@ -138,10 +132,10 @@ export async function updateAdminRole(
     ),
   )
 
-  writeAuditLog(db, {
+  writeAdminAuditLog(db, {
     actorUserId: input.actorUserId,
-    action: "admin.role.update",
-    targetType: "admin_role",
+    action: AdminAuditAction.RoleUpdate,
+    targetType: AdminAuditTargetType.Role,
     targetId: role.id,
     summary: `updated role ${role.code}`,
   })
@@ -157,26 +151,26 @@ export async function deleteAdminRole(
   const role = getAdminRoleById(db, input.roleId)
 
   if (!role) {
-    throw new AdminDomainError(ADMIN_ROLE_NOT_FOUND, "role not found")
+    throw new AdminDomainError(ADMIN_ROLE_NOT_FOUND, ADMIN_ROLE_NOT_FOUND_MESSAGE)
   }
 
   if (role.code === ROOT_ROLE_CODE || role.isSystem) {
-    throw new AdminDomainError(ADMIN_ROLE_IN_USE, "system role cannot be deleted")
+    throw new AdminDomainError(ADMIN_ROLE_IN_USE, ADMIN_ROLE_SYSTEM_DELETE_MESSAGE)
   }
 
   const assignedUsers = getUsersByRoleId(db, role.id)
 
   if (assignedUsers.length > 0) {
-    throw new AdminDomainError(ADMIN_ROLE_IN_USE, "role is in use")
+    throw new AdminDomainError(ADMIN_ROLE_IN_USE, ADMIN_ROLE_IN_USE_MESSAGE)
   }
 
   replaceAdminRolePermissions(db, role.id, [])
   deleteAdminRoleRecord(db, role.id)
 
-  writeAuditLog(db, {
+  writeAdminAuditLog(db, {
     actorUserId: input.actorUserId,
-    action: "admin.role.delete",
-    targetType: "admin_role",
+    action: AdminAuditAction.RoleDelete,
+    targetType: AdminAuditTargetType.Role,
     targetId: role.id,
     summary: `deleted role ${role.code}`,
   })
@@ -201,7 +195,7 @@ export async function getAdminRoleDetail(db: AdminDb, roleId: string) {
   const role = getAdminRoleById(db, roleId)
 
   if (!role) {
-    throw new AdminDomainError(ADMIN_ROLE_NOT_FOUND, "role not found")
+    throw new AdminDomainError(ADMIN_ROLE_NOT_FOUND, ADMIN_ROLE_NOT_FOUND_MESSAGE)
   }
 
   return {
@@ -212,7 +206,7 @@ export async function getAdminRoleDetail(db: AdminDb, roleId: string) {
 
 export async function getAdminRoleOptions(db: AdminDb) {
   return {
-    items: listRoleRows(db, 1, countAdminRoles(db) || 100),
+    items: listRoleRows(db, ADMIN_FIRST_PAGE, countAdminRoles(db) || ADMIN_ROLE_OPTIONS_FALLBACK_PAGE_SIZE),
     total: countAdminRoles(db),
   }
 }

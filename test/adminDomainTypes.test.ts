@@ -19,9 +19,21 @@ describe("admin domain types and helpers", () => {
     expect(sharedAdmin).toContain("AdminCurrentUser");
     expect(sharedAdmin).toContain("AdminSessionUser");
     expect(sharedAdmin).toContain("AdminSessionState");
-    expect(sharedAdmin).toContain("AdminPageMetaByPath");
+    expect(sharedAdmin).toContain("export type AdminPageMeta");
     expect(sharedApi).toContain("ApiPageData");
     expect(sharedIndex).toContain('export * from "./admin"');
+  });
+
+  test("centralizes admin runtime domain constants outside shared types", () => {
+    const sharedAdmin = readProjectFile("shared/types/admin.ts");
+    const sharedDomain = readProjectFile("shared/admin/domain.ts");
+
+    expect(sharedDomain).toContain("export const AdminPermissionCode");
+    expect(sharedDomain).toContain("export const AdminNavigationSchema");
+    expect(sharedDomain).toContain("export const AdminPermissionRouteEntries");
+    expect(sharedDomain).toContain("export const AdminPageMetaByPath");
+    expect(sharedAdmin).not.toContain("export const AdminPermissionCode");
+    expect(sharedAdmin).not.toContain("export const AdminPageMetaByPath");
   });
 
   test("provides response helpers for success, failure, and pagination", () => {
@@ -33,15 +45,17 @@ describe("admin domain types and helpers", () => {
   });
 
   test("centralizes admin error codes and permission seeds", () => {
+    const sharedDomain = readProjectFile("shared/admin/domain.ts");
     const errorCodes = readProjectFile("server/utils/admin/error-codes.ts");
     const permissions = readProjectFile("server/utils/admin/permissions.ts");
 
     expect(errorCodes).toContain("ADMIN_AUTH_INVALID");
     expect(errorCodes).toContain("ADMIN_SYSTEM_ALREADY_INITIALIZED");
     expect(errorCodes).toContain("ADMIN_INTERNAL_ERROR");
-    expect(permissions).toContain("admin.dashboard");
-    expect(permissions).toContain("admin.users");
-    expect(permissions).toContain("admin.roles");
+    expect(sharedDomain).toContain("admin.dashboard");
+    expect(sharedDomain).toContain("admin.users");
+    expect(sharedDomain).toContain("admin.roles");
+    expect(permissions).toContain("AdminPermissionDefinitions");
     expect(permissions).toContain("ROOT_ROLE_CODE");
   });
 });

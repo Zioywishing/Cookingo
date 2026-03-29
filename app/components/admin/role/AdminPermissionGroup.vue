@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AdminPermissionItem } from "#shared/types/admin"
+import { formatAdminPermissionGroupLabel } from "~/composables/useAdminUi"
 
 defineProps<{
   groupKey: string
@@ -13,50 +14,51 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section class="group-card">
-    <h4>{{ groupKey }}</h4>
+  <AdminBaseAdminCard :title="formatAdminPermissionGroupLabel(groupKey)" muted padding="md">
     <div class="items">
       <label v-for="item in items" :key="item.code" class="item">
         <input
           :checked="selectedCodes.includes(item.code)"
           type="checkbox"
           @change="emit('toggle', item.code)"
-        />
+        >
         <div>
           <strong>{{ item.name }}</strong>
           <p>{{ item.description }} · {{ item.routePath }}</p>
         </div>
       </label>
     </div>
-  </section>
+  </AdminBaseAdminCard>
 </template>
 
 <style scoped>
-.group-card {
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(15, 23, 42, 0.52);
-}
-
-h4 {
-  margin: 0 0 12px;
-  text-transform: capitalize;
-}
-
 .items {
   display: grid;
-  gap: 10px;
+  gap: 0.75rem;
 }
 
 .item {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 10px;
+  gap: 0.8rem;
+  padding: 0.95rem;
+  border: 1px solid var(--admin-border-subtle, #f3f4f6);
+  border-radius: 0.75rem;
+  background: var(--admin-bg-surface, #fff);
+}
+
+input {
+  margin-top: 0.15rem;
+  accent-color: var(--admin-accent, #9c27b0);
+}
+
+strong {
+  color: var(--admin-text-primary, #111827);
 }
 
 p {
-  margin: 6px 0 0;
-  color: #cbd5e1;
+  margin: 0.35rem 0 0;
+  color: var(--admin-text-secondary, #4b5563);
+  line-height: 1.6;
 }
 </style>

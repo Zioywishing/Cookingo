@@ -1,55 +1,30 @@
 import type {
   AdminRoleListItem,
-  AdminRoleSummary,
   AdminUserDetail,
   AdminUserListItem,
   AdminUserStatus,
 } from "#shared/types/admin"
 import type { ApiPageData, ApiResponse } from "#shared/types/api"
 
-type AdminUserRow = {
-  id: string
-  username: string
-  displayName: string
-  status: AdminUserStatus
-  roles: AdminRoleSummary[]
-  lastLoginAt: string | null
-  passwordChangedAt: string | null
-  createdAt: string
-  updatedAt: string
-}
-
 function getAdminRequestHeaders() {
   return import.meta.server ? useRequestHeaders(["cookie"]) : undefined
-}
-
-function mapAdminUserListItem(row: AdminUserRow): AdminUserListItem {
-  return {
-    id: row.id,
-    username: row.username,
-    displayName: row.displayName,
-    status: row.status,
-    roles: row.roles,
-    lastLoginAt: row.lastLoginAt,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-  }
-}
-
-function mapAdminUserDetail(row: AdminUserRow): AdminUserDetail {
-  return {
-    ...mapAdminUserListItem(row),
-    passwordChangedAt: row.passwordChangedAt,
-  }
 }
 
 function mapAdminRoleOption(row: AdminRoleListItem): AdminRoleListItem {
   return row
 }
 
+function unwrapAdminResponse<T>(response: ApiResponse<T>) {
+  if (response.code !== 0) {
+    throw new Error(response.msg || "请求失败，请稍后重试")
+  }
+
+  return response.data
+}
+
 export function useAdminUsers() {
   async function listUsers(page = 1, pageSize = 20) {
-    const response = await $fetch<ApiResponse<ApiPageData<AdminUserRow>>>(
+    const response = await $fetch<ApiResponse<ApiPageData<AdminUserListItem>>>(
       "/api/admin/get/users",
       {
         query: {
@@ -60,14 +35,11 @@ export function useAdminUsers() {
       },
     )
 
-    return {
-      ...response.data,
-      items: response.data.items.map(mapAdminUserListItem),
-    }
+    return unwrapAdminResponse(response)
   }
 
   async function getUserDetail(id: string) {
-    const response = await $fetch<ApiResponse<AdminUserRow>>(
+    const response = await $fetch<ApiResponse<AdminUserDetail>>(
       "/api/admin/get/userDetail",
       {
         query: { id },
@@ -75,7 +47,7 @@ export function useAdminUsers() {
       },
     )
 
-    return mapAdminUserDetail(response.data)
+    return unwrapAdminResponse(response)
   }
 
   async function listRoleOptions() {
@@ -90,7 +62,7 @@ export function useAdminUsers() {
       },
     )
 
-    return response.data.items.map(mapAdminRoleOption)
+    return unwrapAdminResponse(response).items.map(mapAdminRoleOption)
   }
 
   async function createUser(payload: {
@@ -98,7 +70,7 @@ export function useAdminUsers() {
     displayName: string
     password: string
   }) {
-    return await $fetch<ApiResponse<AdminUserRow>>("/api/admin/post/users", {
+    return await $fetch<ApiResponse<AdminUserDetail>>("/api/admin/post/users", {
       method: "POST",
       body: payload,
       headers: getAdminRequestHeaders(),

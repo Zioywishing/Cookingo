@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AdminUserDetail } from "#shared/types/admin"
+import { resolveAdminBadgeTone } from "~/composables/useAdminUi"
 
 const props = defineProps<{
   user: AdminUserDetail | null
@@ -24,57 +25,48 @@ watch(
 </script>
 
 <template>
-  <section class="card">
-    <h3>基础信息</h3>
+  <AdminBaseAdminSection title="基础信息" description="维护当前后台用户的基础资料与登录概况。">
     <div v-if="user" class="grid">
-      <label>
-        <span>用户名</span>
-        <input :value="user.username" disabled />
-      </label>
-      <label>
-        <span>显示名</span>
-        <input v-model="form.displayName" />
-      </label>
-      <label>
-        <span>状态</span>
-        <input :value="user.status" disabled />
-      </label>
-      <label>
-        <span>最近登录</span>
-        <input :value="user.lastLoginAt || '-'" disabled />
-      </label>
+      <AdminBaseAdminField label="用户名">
+        <AdminBaseAdminInput :model-value="user.username" disabled />
+      </AdminBaseAdminField>
+      <AdminBaseAdminField label="显示名">
+        <AdminBaseAdminInput v-model="form.displayName" />
+      </AdminBaseAdminField>
+      <AdminBaseAdminField label="状态">
+        <div class="status-row">
+          <AdminBaseAdminBadge :tone="resolveAdminBadgeTone(user.status)">
+            {{ user.status }}
+          </AdminBaseAdminBadge>
+        </div>
+      </AdminBaseAdminField>
+      <AdminBaseAdminField label="最近登录">
+        <AdminBaseAdminInput :model-value="user.lastLoginAt || '-'" disabled />
+      </AdminBaseAdminField>
     </div>
-    <button type="button" :disabled="pending" @click="emit('save', form.displayName)">
-      {{ pending ? "保存中..." : "保存基础信息" }}
-    </button>
-  </section>
+    <div class="actions">
+      <AdminBaseAdminButton type="button" variant="primary" :loading="pending" @click="emit('save', form.displayName)">
+        保存基础信息
+      </AdminBaseAdminButton>
+    </div>
+  </AdminBaseAdminSection>
 </template>
 
 <style scoped>
-.card {
-  padding: 24px;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.44);
-}
-
 .grid {
   display: grid;
-  gap: 12px;
-  margin: 18px 0;
+  gap: 0.9rem;
 }
 
-label {
-  display: grid;
-  gap: 6px;
+.status-row {
+  display: flex;
+  align-items: center;
+  min-height: 2.9rem;
 }
 
-input {
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  background: rgba(15, 23, 42, 0.56);
-  color: #f8fafc;
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
 }
 </style>

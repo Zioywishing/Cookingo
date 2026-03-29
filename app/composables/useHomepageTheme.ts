@@ -213,7 +213,7 @@ export function getHomepageThemeState(date: Date): IHomepageThemeState {
     ...definition,
     segment,
     copyIndex,
-    headline: definition.copyOptions[copyIndex],
+    headline: definition.copyOptions[copyIndex] ?? definition.copyOptions[0],
   };
 }
 

@@ -29,52 +29,61 @@ function toggleRole(roleId: string) {
 </script>
 
 <template>
-  <section class="card">
-    <h3>角色配置</h3>
+  <AdminBaseAdminSection title="角色配置" description="为当前用户分配后台角色集合。">
     <div class="options">
       <label v-for="role in roles" :key="role.id" class="option">
         <input
           :checked="localRoleIds.includes(role.id)"
           type="checkbox"
           @change="toggleRole(role.id)"
-        />
+        >
         <div>
           <strong>{{ role.name }}</strong>
           <p>{{ role.description || role.code }}</p>
         </div>
       </label>
     </div>
-    <button type="button" :disabled="pending" @click="emit('save', localRoleIds)">
-      {{ pending ? "保存中..." : "保存角色配置" }}
-    </button>
-  </section>
+    <div class="actions">
+      <AdminBaseAdminButton type="button" variant="primary" :loading="pending" @click="emit('save', localRoleIds)">
+        保存角色配置
+      </AdminBaseAdminButton>
+    </div>
+  </AdminBaseAdminSection>
 </template>
 
 <style scoped>
-.card {
-  padding: 24px;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.44);
-}
-
 .options {
   display: grid;
-  gap: 10px;
-  margin: 18px 0;
+  gap: 0.8rem;
 }
 
 .option {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.56);
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--admin-border-subtle, #f3f4f6);
+  border-radius: 0.75rem;
+  background: var(--admin-bg-muted, #f9fafb);
+}
+
+input {
+  margin-top: 0.15rem;
+  accent-color: var(--admin-accent, #9c27b0);
+}
+
+strong {
+  color: var(--admin-text-primary, #111827);
 }
 
 p {
-  margin: 6px 0 0;
-  color: #cbd5e1;
+  margin: 0.35rem 0 0;
+  color: var(--admin-text-secondary, #4b5563);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
 }
 </style>

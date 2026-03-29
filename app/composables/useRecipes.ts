@@ -14,14 +14,22 @@ export function findRecipeById(recipes: IRecipeSchema[], id: string) {
 }
 
 export function useRecipes() {
+  const fallbackResponse: ApiResponse<IRecipeSchema[]> = {
+    code: 0,
+    data: [],
+    msg: "success",
+  };
+
   const { data, pending, error } = useFetch<ApiResponse<IRecipeSchema[]>>(
     "/api/get/recipeList",
     {
-      default: () => null,
+      default: () => fallbackResponse,
     },
   );
 
-  const recipes = computed(() => resolveRecipesResponse(data.value));
+  const recipes = computed(() =>
+    resolveRecipesResponse(data.value ?? fallbackResponse),
+  );
 
   function getRecipeById(id: string) {
     return findRecipeById(recipes.value, id);

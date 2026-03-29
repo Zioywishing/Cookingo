@@ -7,6 +7,7 @@ defineProps<{
 
 <template>
   <header class="admin-page-header">
+    <p class="eyebrow">Admin Workspace</p>
     <h2>{{ title }}</h2>
     <p>{{ description }}</p>
   </header>
@@ -14,20 +15,29 @@ defineProps<{
 
 <style scoped>
 .admin-page-header {
-  padding: 24px 26px;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.44);
+  display: grid;
+  gap: 0.35rem;
 }
 
 h2 {
   margin: 0;
-  font-size: 1.45rem;
+  font-family: var(--admin-font-serif, "Georgia", serif);
+  font-size: clamp(1.8rem, 4vw, 2.25rem);
+  font-weight: 600;
 }
 
 p {
-  margin: 10px 0 0;
-  line-height: 1.7;
-  color: #cbd5e1;
+  margin: 0;
+  max-width: 42rem;
+  line-height: 1.6;
+  color: var(--admin-text-secondary, #4b5563);
+}
+
+.eyebrow {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--admin-text-tertiary, #9ca3af);
 }
 </style>
