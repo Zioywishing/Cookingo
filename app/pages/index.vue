@@ -12,6 +12,7 @@ useSeoMeta({
   description: "一个安静的做饭入口。先进入，再选今天要做的菜。",
 });
 
+// todo: 这里做seo适配，放弃随时间段切换文案，实现纯后端SSR
 const { themeState } = useHomepageTheme();
 </script>
 
@@ -61,6 +62,7 @@ const { themeState } = useHomepageTheme();
 
 <style scoped>
 .homepage-entry {
+  height: 100%;
   min-height: 100%;
   box-sizing: border-box;
   color: var(--app-theme-text-primary);
@@ -270,6 +272,7 @@ const { themeState } = useHomepageTheme();
 @media (min-width: 768px) {
   .homepage-entry__content {
     min-height: min(56rem, calc(100dvh - 2rem));
+    height: 100%;
     padding: 2rem;
   }
 }

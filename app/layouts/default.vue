@@ -92,6 +92,10 @@
   min-height: 100vh;
   min-height: 100svh;
   min-height: 100dvh;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  overflow-y: scroll;
 }
 
 .default-layout::-webkit-scrollbar {
@@ -114,6 +118,8 @@
 
   .default-layout__view {
     min-height: min(56rem, calc(100dvh - 2rem));
+    max-height: calc(100dvh - 2rem);
+    height: 100%;
   }
 }
 
