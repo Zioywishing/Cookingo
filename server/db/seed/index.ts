@@ -2,6 +2,7 @@ import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite"
 
 import { createAdminDbClient } from "../client"
 import * as schema from "../schema"
+import { resolveAdminSqliteFilePath } from "../../utils/admin/runtime-config"
 import { seedAdminPermissions } from "./admin-permissions"
 
 export type AdminDb = BunSQLiteDatabase<typeof schema>
@@ -11,9 +12,7 @@ export function seedAdminBaseData(db: AdminDb) {
 }
 
 if (import.meta.main) {
-  const db = createAdminDbClient(
-    process.env.NUXT_SQLITE_FILE_PATH || "./data/cookingo.sqlite",
-  )
+  const db = createAdminDbClient(resolveAdminSqliteFilePath())
 
   seedAdminBaseData(db)
 }

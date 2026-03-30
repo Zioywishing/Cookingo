@@ -2,7 +2,13 @@ import { eq, inArray } from "drizzle-orm"
 
 import type { ReturnTypeCreateAdminDbClient } from "./types"
 import { createAdminId } from "../../utils/admin/id"
-import { ADMIN_PERMISSION_SEED, ROOT_ROLE_CODE } from "../../utils/admin/permissions"
+import { ADMIN_ROOT_ROLE_MISSING_MESSAGE } from "../../utils/admin/error-messages"
+import {
+  ADMIN_PERMISSION_SEED,
+  ROOT_ROLE_CODE,
+  ROOT_ROLE_DESCRIPTION,
+  ROOT_ROLE_NAME,
+} from "../../utils/admin/permissions"
 import { getNowIso } from "../../utils/admin/time"
 import { adminPermission, adminRole, adminRolePermission } from "../schema"
 
@@ -27,9 +33,9 @@ export function seedAdminPermissions(db: ReturnTypeCreateAdminDbClient) {
   db.insert(adminRole)
     .values({
       id: createAdminId(),
-      name: "超级管理员",
+      name: ROOT_ROLE_NAME,
       code: ROOT_ROLE_CODE,
-      description: "系统保留超级管理员角色",
+      description: ROOT_ROLE_DESCRIPTION,
       isSystem: true,
       createdAt: now,
       updatedAt: now,
@@ -40,7 +46,7 @@ export function seedAdminPermissions(db: ReturnTypeCreateAdminDbClient) {
   const rootRole = db.select().from(adminRole).where(eq(adminRole.code, ROOT_ROLE_CODE)).get()
 
   if (!rootRole) {
-    throw new Error("root role missing after seed")
+    throw new Error(ADMIN_ROOT_ROLE_MISSING_MESSAGE)
   }
 
   const permissions = db.select().from(adminPermission).where(

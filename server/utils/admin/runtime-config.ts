@@ -1,6 +1,11 @@
 import { existsSync, readFileSync } from "node:fs"
 import { resolve } from "node:path"
 
+const ADMIN_ENV_FILE_ENCODING = "utf8"
+export const ADMIN_RUNTIME_ENV_FILES = [".env.dev", ".env"] as const
+export const ADMIN_DEFAULT_SQLITE_FILE_PATH = "./data/cookingo.sqlite"
+export const ADMIN_MIGRATIONS_FOLDER = "./server/db/migrations"
+
 function stripWrappingQuotes(value: string) {
   if (
     (value.startsWith('"') && value.endsWith('"'))
@@ -42,7 +47,7 @@ function readEnvFile(filePath: string) {
     return {}
   }
 
-  return parseEnvFile(readFileSync(filePath, "utf8"))
+  return parseEnvFile(readFileSync(filePath, ADMIN_ENV_FILE_ENCODING))
 }
 
 export function resolveRuntimeEnv(
@@ -60,7 +65,7 @@ export function resolveRuntimeEnv(
   }
 
   const cwd = options?.cwd || process.cwd()
-  const envFiles = options?.envFiles || [".env.dev", ".env"]
+  const envFiles = options?.envFiles || [...ADMIN_RUNTIME_ENV_FILES]
 
   for (const envFile of envFiles) {
     const fileValue = readEnvFile(resolve(cwd, envFile))[key]
@@ -71,4 +76,15 @@ export function resolveRuntimeEnv(
   }
 
   return options?.fallback || ""
+}
+
+export function resolveAdminSqliteFilePath(options?: {
+  cwd?: string
+  envFiles?: string[]
+}) {
+  return resolveRuntimeEnv("NUXT_SQLITE_FILE_PATH", {
+    cwd: options?.cwd,
+    envFiles: options?.envFiles,
+    fallback: ADMIN_DEFAULT_SQLITE_FILE_PATH,
+  })
 }

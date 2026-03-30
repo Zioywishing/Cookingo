@@ -1,8 +1,13 @@
 import type { ApiPageData, ApiResponse } from "~~/shared/types/api"
 
-export function successResponse<T>(data: T, msg = "success"): ApiResponse<T> {
+import {
+  ADMIN_SUCCESS_RESPONSE_CODE,
+  ADMIN_SUCCESS_RESPONSE_MESSAGE,
+} from "./admin/constants"
+
+export function successResponse<T>(data: T, msg = ADMIN_SUCCESS_RESPONSE_MESSAGE): ApiResponse<T> {
   return {
-    code: 0,
+    code: ADMIN_SUCCESS_RESPONSE_CODE,
     data,
     msg,
   }
@@ -21,7 +26,7 @@ export function pageResponse<T>(
   total: number,
   page: number,
   pageSize: number,
-  msg = "success",
+  msg = ADMIN_SUCCESS_RESPONSE_MESSAGE,
 ): ApiResponse<ApiPageData<T>> {
   return successResponse(
     {

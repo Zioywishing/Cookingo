@@ -1,6 +1,16 @@
 import { sql } from "drizzle-orm"
 import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 
+import {
+  ADMIN_INITIAL_TOKEN_VERSION,
+  ADMIN_USER_STATUS_VALUES,
+} from "../../utils/admin/constants"
+
+const adminUserStatusCheckValues = sql.raw(
+  ADMIN_USER_STATUS_VALUES.map((status) => `'${status}'`).join(", "),
+)
+const adminInitialTokenVersion = sql.raw(String(ADMIN_INITIAL_TOKEN_VERSION))
+
 export const adminUser = sqliteTable(
   "admin_user",
   {
@@ -20,8 +30,8 @@ export const adminUser = sqliteTable(
     index("admin_user_created_at_idx").on(table.createdAt),
     check(
       "admin_user_status_check",
-      sql`${table.status} in ('active', 'disabled')`,
+      sql`${table.status} in (${adminUserStatusCheckValues})`,
     ),
-    check("admin_user_token_version_check", sql`${table.tokenVersion} > 0`),
+    check("admin_user_token_version_check", sql`${table.tokenVersion} >= ${adminInitialTokenVersion}`),
   ],
 )

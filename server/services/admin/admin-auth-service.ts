@@ -7,6 +7,8 @@ import {
   ADMIN_ACTIVE_USER_STATUS,
   AdminLoginReason,
   AdminLoginResult,
+  type AdminLoginReasonValue,
+  type AdminLoginResultValue,
 } from "../../utils/admin/constants"
 import {
   ADMIN_AUTH_BAD_CREDENTIALS_MESSAGE,
@@ -30,8 +32,8 @@ async function writeLoginAttempt(
   input: {
     username: string
     userId?: string | null
-    result: (typeof AdminLoginResult)[keyof typeof AdminLoginResult]
-    reason?: string | null
+    result: AdminLoginResultValue
+    reason?: AdminLoginReasonValue | null
     ip?: string | null
     userAgent?: string | null
   },

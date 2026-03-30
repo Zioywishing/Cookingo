@@ -58,4 +58,14 @@ describe("admin domain types and helpers", () => {
     expect(permissions).toContain("AdminPermissionDefinitions");
     expect(permissions).toContain("ROOT_ROLE_CODE");
   });
+
+  test("keeps audit and login helper inputs tied to shared literal types", () => {
+    const auditSource = readProjectFile("server/utils/admin/audit.ts");
+    const authServiceSource = readProjectFile("server/services/admin/admin-auth-service.ts");
+
+    expect(auditSource).not.toContain("action: string");
+    expect(auditSource).not.toContain("targetType: string");
+    expect(authServiceSource).not.toContain("reason?: string | null");
+    expect(authServiceSource).toContain("AdminLoginReasonValue");
+  });
 });

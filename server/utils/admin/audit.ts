@@ -8,6 +8,7 @@ export const AdminAuditTargetType = {
   User: "admin_user",
   Role: "admin_role",
 } as const
+export type AdminAuditTargetTypeValue = (typeof AdminAuditTargetType)[keyof typeof AdminAuditTargetType]
 
 export const AdminAuditAction = {
   UserCreate: "admin.user.create",
@@ -19,13 +20,14 @@ export const AdminAuditAction = {
   RoleUpdate: "admin.role.update",
   RoleDelete: "admin.role.delete",
 } as const
+export type AdminAuditActionValue = (typeof AdminAuditAction)[keyof typeof AdminAuditAction]
 
 export function writeAdminAuditLog(
   db: AdminDb,
   input: {
     actorUserId: string
-    action: string
-    targetType: string
+    action: AdminAuditActionValue
+    targetType: AdminAuditTargetTypeValue
     targetId: string
     summary: string
     createdAt?: string
@@ -38,6 +40,6 @@ export function writeAdminAuditLog(
     targetType: input.targetType,
     targetId: input.targetId,
     summary: input.summary,
-    createdAt: input.createdAt || getNowIso(),
+    createdAt: input.createdAt ?? getNowIso(),
   })
 }

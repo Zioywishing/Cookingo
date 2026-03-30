@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test"
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { resolve } from "node:path"
 
@@ -72,6 +72,37 @@ describe("admin runtime config helpers", () => {
       }
       else {
         process.env.NUXT_ADMIN_JWT_SECRET = originalSecret
+      }
+    }
+  })
+
+  test("centralizes sqlite path and env file defaults for admin runtime consumers", async () => {
+    const {
+      ADMIN_DEFAULT_SQLITE_FILE_PATH,
+      ADMIN_RUNTIME_ENV_FILES,
+      resolveAdminSqliteFilePath,
+    } = await import("../server/utils/admin/runtime-config")
+    const cwd = mkdtempSync(resolve(tmpdir(), "cookingo-admin-env-"))
+    tempDirs.push(cwd)
+
+    const migrateSource = readFileSync(resolve(import.meta.dir, "../server/db/migrate.ts"), "utf8")
+    const seedSource = readFileSync(resolve(import.meta.dir, "../server/db/seed/index.ts"), "utf8")
+    const originalSqliteFilePath = process.env.NUXT_SQLITE_FILE_PATH
+
+    delete process.env.NUXT_SQLITE_FILE_PATH
+
+    try {
+      expect(ADMIN_RUNTIME_ENV_FILES).toEqual([".env.dev", ".env"])
+      expect(resolveAdminSqliteFilePath({ cwd })).toBe(ADMIN_DEFAULT_SQLITE_FILE_PATH)
+      expect(migrateSource).toContain("resolveAdminSqliteFilePath")
+      expect(seedSource).toContain("resolveAdminSqliteFilePath")
+    }
+    finally {
+      if (originalSqliteFilePath === undefined) {
+        delete process.env.NUXT_SQLITE_FILE_PATH
+      }
+      else {
+        process.env.NUXT_SQLITE_FILE_PATH = originalSqliteFilePath
       }
     }
   })

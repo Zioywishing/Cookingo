@@ -50,4 +50,14 @@ describe("admin drizzle schema", () => {
     expect(migrationSql).toContain("admin_role");
     expect(migrationSql).toContain("admin_permission");
   });
+
+  test("derives admin user status checks from shared status values", async () => {
+    const { AdminUserStatus } = await import("../shared/admin/domain");
+    const { ADMIN_USER_STATUS_VALUES } = await import("../server/utils/admin/constants");
+    const adminUserSchemaSource = readFileSync(resolve(import.meta.dir, "../server/db/schema/admin-user.ts"), "utf8");
+
+    expect(ADMIN_USER_STATUS_VALUES).toEqual(Object.values(AdminUserStatus));
+    expect(adminUserSchemaSource).toContain("ADMIN_USER_STATUS_VALUES");
+    expect(adminUserSchemaSource).not.toContain("('active', 'disabled')");
+  });
 });
