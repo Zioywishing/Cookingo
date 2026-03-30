@@ -9,10 +9,10 @@ function readProjectFile(relativePath: string) {
 }
 
 describe("homepage entry page", () => {
-  test("adopts the demo-inspired hero structure and time pill", () => {
+  test("keeps homepage content but removes page-owned ambient shell markup", () => {
     const page = readProjectFile("app/pages/index.vue");
 
-    expect(page).toContain('class="homepage-entry__ambient"');
+    expect(page).not.toContain('class="homepage-entry__ambient"');
     expect(page).toContain('class="homepage-entry__status"');
     expect(page).toContain('class="homepage-entry__logo"');
     expect(page).toContain('class="homepage-entry__brand"');
