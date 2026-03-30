@@ -16,6 +16,16 @@ describe("C-end layout integration", () => {
     expect(appShell).toContain("<NuxtPage />");
   });
 
+  test("injects the front-theme bootstrap script from the app shell for non-admin routes", () => {
+    const appShell = readProjectFile("app/app.vue");
+
+    expect(appShell).toContain("useGlobalTheme");
+    expect(appShell).toContain("useRoute()");
+    expect(appShell).toContain('startsWith("/admin")');
+    expect(appShell).toContain("buildGlobalThemeBootstrapScript");
+    expect(appShell).toContain("<NuxtLayout>");
+  });
+
   test("provides a default layout with viewport sizing and hidden scrollbars", () => {
     const defaultLayout = readProjectFile("app/layouts/default.vue");
 
