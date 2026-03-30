@@ -6,10 +6,9 @@ import {
   getHomepageThemeState,
   resolveHomepageSegment,
 } from "../app/composables/useHomepageTheme";
-import { EAST_8_TIMEZONE_OFFSET_HOURS } from "../app/utils/timezone";
 
 describe("useHomepageTheme helpers", () => {
-  test("resolves the 7 homepage time segments by hour", () => {
+  test("resolves the 7 homepage content segments by local hour", () => {
     expect(resolveHomepageSegment(0)).toBe(HomepageSegment.Midnight);
     expect(resolveHomepageSegment(4)).toBe(HomepageSegment.Midnight);
     expect(resolveHomepageSegment(5)).toBe(HomepageSegment.Morning);
@@ -34,8 +33,8 @@ describe("useHomepageTheme helpers", () => {
     expect(getCopyIndexForHour(date)).toBeLessThan(3);
   });
 
-  test("builds the dusk homepage state with time-linked copy and theme colors", () => {
-    const state = getHomepageThemeState(new Date("2026-03-27T09:00:00.000Z"));
+  test("builds homepage content state without exposing palette data", () => {
+    const state = getHomepageThemeState(new Date(2026, 2, 27, 17, 0, 0));
 
     expect(state.segment).toBe(HomepageSegment.Dusk);
     expect(state.label).toBe("傍晚");
@@ -43,19 +42,12 @@ describe("useHomepageTheme helpers", () => {
     expect(state.copyOptions).toHaveLength(3);
     expect(state.copyOptions).toContain("今晚做点热的。");
     expect(state.headline).toBe(state.copyOptions[state.copyIndex]);
-    expect(state.palette.shellBackground).toBe("#1A0F0A");
-    expect(state.palette.base).toBe("#2B160E");
-    expect(state.palette.surface).toBe("#3D2218");
-    expect(state.palette.glow).toContain("255, 94, 51");
-    expect(state.palette.button).toBe("#FF5E33");
-    expect(state.palette.buttonText).toBe("#2B160E");
-    expect(state.palette.text).toBe("#FFF0E6");
+    expect("palette" in state).toBe(false);
   });
 
-  test("uses fixed east-8 timezone instead of the runtime local timezone", () => {
-    const state = getHomepageThemeState(new Date("2026-03-27T18:00:00.000Z"));
+  test("uses local runtime time instead of a fixed timezone conversion", () => {
+    const state = getHomepageThemeState(new Date(2026, 2, 27, 2, 0, 0));
 
-    expect(EAST_8_TIMEZONE_OFFSET_HOURS).toBe(8);
     expect(state.segment).toBe(HomepageSegment.Midnight);
     expect(state.label).toBe("凌晨");
     expect(state.timeRange).toBe("00:00 - 04:59");
