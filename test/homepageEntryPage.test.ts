@@ -21,4 +21,16 @@ describe("homepage entry page", () => {
     expect(page).toContain("开启灵感");
     expect(page).toContain('to="/recipes"');
   });
+
+  test("keeps theme transitions on layout and homepage consumer classes", () => {
+    const defaultLayout = readProjectFile("app/layouts/default.vue");
+    const page = readProjectFile("app/pages/index.vue");
+
+    expect(defaultLayout).toContain("transition:");
+    expect(defaultLayout).toContain("background-color");
+    expect(defaultLayout).toContain("box-shadow");
+    expect(page).toContain("transition:");
+    expect(page).toContain("color");
+    expect(page).toContain("stroke");
+  });
 });

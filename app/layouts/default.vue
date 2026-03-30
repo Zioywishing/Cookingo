@@ -29,6 +29,9 @@
     max(0px, env(safe-area-inset-bottom))
     max(0px, env(safe-area-inset-left));
   background: var(--app-theme-shell-background);
+  transition:
+    background-color 320ms ease,
+    color 320ms ease;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: none;
@@ -44,6 +47,9 @@
   box-sizing: border-box;
   overflow: hidden;
   background: var(--app-theme-surface-base);
+  transition:
+    background-color 320ms ease,
+    box-shadow 320ms ease;
 }
 
 .default-layout__ambient {
@@ -59,6 +65,9 @@
   background: radial-gradient(circle, var(--app-theme-glow) 0%, rgba(0, 0, 0, 0) 70%);
   filter: blur(56px);
   animation: default-layout-breathe 12s ease-in-out infinite alternate;
+  transition:
+    background 320ms ease,
+    opacity 320ms ease;
 }
 
 .default-layout__orb--primary {

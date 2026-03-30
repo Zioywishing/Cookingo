@@ -66,6 +66,7 @@ const { themeState } = useHomepageTheme();
   color: var(--app-theme-text-primary);
   overflow: hidden;
   font-family: "Quicksand", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  transition: color 320ms ease;
 }
 
 .homepage-entry__content {
@@ -96,6 +97,9 @@ const { themeState } = useHomepageTheme();
   border-radius: 999px;
   background: color-mix(in srgb, var(--app-theme-surface-elevated) 88%, transparent);
   backdrop-filter: blur(14px);
+  transition:
+    background-color 320ms ease,
+    box-shadow 320ms ease;
 }
 
 .homepage-entry__status-dot {
@@ -105,6 +109,9 @@ const { themeState } = useHomepageTheme();
   background: var(--app-theme-accent);
   box-shadow: 0 0 0 0 var(--app-theme-glow);
   animation: homepage-pulse 2s infinite;
+  transition:
+    background-color 320ms ease,
+    box-shadow 320ms ease;
 }
 
 .homepage-entry__status-time {
@@ -112,6 +119,7 @@ const { themeState } = useHomepageTheme();
   font-weight: 700;
   color: var(--app-theme-text-primary);
   letter-spacing: 0.06em;
+  transition: color 320ms ease;
 }
 
 .homepage-entry__hero {
@@ -137,6 +145,9 @@ const { themeState } = useHomepageTheme();
   opacity: 0;
   transform: translateY(1rem);
   animation: homepage-fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 240ms forwards;
+  transition:
+    background-color 320ms ease,
+    box-shadow 320ms ease;
 }
 
 .homepage-entry__logo svg {
@@ -147,6 +158,7 @@ const { themeState } = useHomepageTheme();
   stroke-width: 2.3;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: stroke 320ms ease;
 }
 
 .homepage-entry__eyebrow,
@@ -162,6 +174,7 @@ const { themeState } = useHomepageTheme();
   opacity: 0;
   transform: translateY(1rem);
   animation: homepage-fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 340ms forwards;
+  transition: color 320ms ease;
 }
 
 .homepage-entry__brand {
@@ -174,10 +187,12 @@ const { themeState } = useHomepageTheme();
   opacity: 0;
   transform: translateY(1rem);
   animation: homepage-fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 420ms forwards;
+  transition: color 320ms ease;
 }
 
 .homepage-entry__brand span {
   color: var(--app-theme-accent);
+  transition: color 320ms ease;
 }
 
 .homepage-entry__welcome {
@@ -189,6 +204,7 @@ const { themeState } = useHomepageTheme();
   opacity: 0;
   transform: translateY(1rem);
   animation: homepage-fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) 500ms forwards;
+  transition: color 320ms ease;
 }
 
 .homepage-entry__action {
@@ -215,6 +231,7 @@ const { themeState } = useHomepageTheme();
   font-weight: 700;
   box-shadow: 0 12px 30px var(--app-theme-glow);
   transition:
+    color 320ms ease,
     transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
     background-color 220ms ease,
     box-shadow 220ms ease;
@@ -228,7 +245,9 @@ const { themeState } = useHomepageTheme();
   stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  transition: transform 220ms ease;
+  transition:
+    transform 220ms ease,
+    stroke 320ms ease;
 }
 
 .homepage-entry__cta:focus-visible {
