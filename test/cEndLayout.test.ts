@@ -16,16 +16,25 @@ describe("C-end layout integration", () => {
     expect(appShell).toContain("<NuxtPage />");
   });
 
-  test("provides a default layout with viewport sizing and hidden scrollbars", () => {
+  test("injects the front-theme bootstrap script from the app shell for non-admin routes", () => {
+    const appShell = readProjectFile("app/app.vue");
+
+    expect(appShell).toContain("useGlobalTheme");
+    expect(appShell).toContain("useRoute()");
+    expect(appShell).toContain('startsWith("/admin")');
+    expect(appShell).toContain("buildGlobalThemeBootstrapScript");
+    expect(appShell).toContain("<NuxtLayout>");
+  });
+
+  test("provides a default layout shell with frame, ambient background, and view container", () => {
     const defaultLayout = readProjectFile("app/layouts/default.vue");
 
     expect(defaultLayout).toContain('class="default-layout"');
-    expect(defaultLayout).toContain("width: 100vw");
-    expect(defaultLayout).toContain("height: 100vh");
-    expect(defaultLayout).toContain("overflow-x: hidden");
-    expect(defaultLayout).toContain("overflow-y: auto");
-    expect(defaultLayout).toContain("scrollbar-width: none");
-    expect(defaultLayout).toContain("::-webkit-scrollbar");
+    expect(defaultLayout).toContain('class="default-layout__frame"');
+    expect(defaultLayout).toContain('class="default-layout__ambient"');
+    expect(defaultLayout).toContain('class="default-layout__view"');
+    expect(defaultLayout).toContain("var(--app-theme-shell-background)");
+    expect(defaultLayout).toContain("var(--app-theme-surface-base)");
   });
 
   test("lets non-admin pages use the default layout", () => {
