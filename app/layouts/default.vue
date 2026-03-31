@@ -96,9 +96,15 @@
   height: 100svh;
   height: 100dvh;
   overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .default-layout::-webkit-scrollbar {
+  display: none;
+}
+
+.default-layout__view::-webkit-scrollbar {
   display: none;
 }
 

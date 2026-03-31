@@ -12,7 +12,7 @@
     "preview": "bun run --bun nuxt preview",
     "test": "bun test",
     "postinstall": "nuxt prepare",
-    "quality-check": "bunx tsc --noEmit && bunx oxlint"
+    "quality-check": "bunx nuxt typecheck && bunx oxlint"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "^2.3.1",
