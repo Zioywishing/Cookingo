@@ -52,4 +52,10 @@ describe("C-end layout integration", () => {
 
     expect(adminPage).toContain("layout: 'admin'");
   });
+
+  test("renders nested main routes through app/pages/main.vue", () => {
+    const mainPage = readProjectFile("app/pages/main.vue");
+
+    expect(mainPage).toContain("<NuxtPage />");
+  });
 });

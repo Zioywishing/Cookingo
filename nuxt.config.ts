@@ -4,7 +4,7 @@ import { resolveRuntimeEnv } from "./server/utils/admin/runtime-config"
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ["@nuxt/eslint"],
+  modules: ["@unocss/nuxt", "@nuxt/eslint"],
   routeRules: {
     "/admin/**": {
       ssr: false,

@@ -1,0 +1,579 @@
+<html lang="zh-CN" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" vid="3">
+    <title vid="4">Cookingo - 选择菜谱</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" vid="5">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" vid="6">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet" vid="7">
+    <script src="https://cdn.tailwindcss.com/3.4.17" vid="8"></script>
+    <style vid="9">
+        :root {
+            --font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+            --radius-massive: 64px;
+            --radius-large: 32px;
+            --radius-pill: 100px;
+            --spacing-xs: 8px;
+            --spacing-sm: 16px;
+            --spacing-md: 24px;
+            --spacing-lg: 40px;
+            --spacing-xl: 64px;
+            --transition-speed: 2s; 
+        }
+
+        body.theme-morning {
+            --bg-base: #FFF5F0;
+            --bg-surface: #FFE7D9;
+            --text-main: #3D2012;
+            --text-muted: rgba(61, 32, 18, 0.5);
+            --accent: #FF8260;
+            --accent-hover: #FF6A42;
+            --glow-color: rgba(255, 130, 96, 0.4);
+            --btn-text: #FFFFFF;
+        }
+
+        body.theme-noon {
+            --bg-base: #FDFBF7; 
+            --bg-surface: #F2EBE1;
+            --text-main: #271E15; 
+            --text-muted: rgba(39, 30, 21, 0.5);
+            --accent: #DD6A2A; 
+            --accent-hover: #C55C22;
+            --glow-color: rgba(221, 106, 42, 0.3);
+            --btn-text: #FFFFFF;
+        }
+
+        body.theme-evening {
+            --bg-base: #2B160E;
+            --bg-surface: #3D2218;
+            --text-main: #FFF0E6;
+            --text-muted: rgba(255, 240, 230, 0.6);
+            --accent: #FF5E33;
+            --accent-hover: #FF7A55;
+            --glow-color: rgba(255, 94, 51, 0.2);
+            --btn-text: #2B160E;
+        }
+
+        body.theme-night {
+            --bg-base: #120C08;
+            --bg-surface: #1E1510;
+            --text-main: #FFFFFF;
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --accent: #FF8200;
+            --accent-hover: #FFA23A;
+            --glow-color: rgba(255, 130, 0, 0.2);
+            --btn-text: #120C08;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: #000; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .device-frame {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-base);
+            transition: background-color var(--transition-speed) ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-aspect-ratio: 10/21) and (min-width: 600px) {
+            .device-frame {
+                height: 90vh;
+                width: calc(90vh * (10 / 21));
+                border-radius: var(--radius-large);
+                box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 0 0 8px #000;
+            }
+        }
+
+        .ambient-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .ambient-orb {
+            position: absolute;
+            width: 120vw;
+            height: 120vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--glow-color) 0%, rgba(0,0,0,0) 70%);
+            top: -20%;
+            left: -10%;
+            filter: blur(60px);
+            animation: breathe 12s infinite alternate ease-in-out;
+            transition: background var(--transition-speed) ease;
+        }
+
+        .ambient-orb:nth-child(2) {
+            top: auto;
+            bottom: -30%;
+            left: auto;
+            right: -20%;
+            width: 150vw;
+            height: 150vw;
+            animation-delay: -6s;
+            animation-duration: 18s;
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.6; }
+            100% { transform: scale(1.1) translate(5%, 5%); opacity: 1; }
+        }
+
+        .content-layer {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: var(--spacing-xl) 0 0 0;
+        }
+
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .no-scrollbar {
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
+        }
+
+        
+        .theme-bg-base { background-color: var(--bg-base); transition: background-color var(--transition-speed) ease; }
+        .theme-bg-surface { background-color: var(--bg-surface); transition: background-color var(--transition-speed) ease; }
+        .theme-text-main { color: var(--text-main); transition: color var(--transition-speed) ease; }
+        .theme-text-muted { color: var(--text-muted); transition: color var(--transition-speed) ease; }
+        .theme-text-accent { color: var(--accent); transition: color var(--transition-speed) ease; }
+        .theme-bg-accent { background-color: var(--accent); transition: background-color var(--transition-speed) ease; }
+        .theme-border-accent { border-color: var(--accent); transition: border-color var(--transition-speed) ease; }
+        .theme-border-surface { border-color: var(--bg-surface); transition: border-color var(--transition-speed) ease; }
+        .theme-stroke-accent { stroke: var(--accent); transition: stroke var(--transition-speed) ease; }
+        .theme-stroke-main { stroke: var(--text-main); transition: stroke var(--transition-speed) ease; }
+        .theme-stroke-muted { stroke: var(--text-muted); transition: stroke var(--transition-speed) ease; }
+        
+        
+        .recipe-card {
+            border: 2px solid transparent;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(1);
+        }
+        .recipe-card:active {
+            transform: scale(0.98);
+        }
+        .recipe-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 8px 24px var(--glow-color);
+            background-color: var(--bg-base);
+        }
+        .recipe-card .check-icon {
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .recipe-card.selected .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        
+        .filter-panel {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .filter-panel.open {
+            max-height: 400px;
+            opacity: 1;
+            margin-bottom: 16px;
+        }
+
+        .filter-chip {
+            transition: all 0.2s ease;
+        }
+        .filter-chip.active {
+            background-color: var(--accent);
+            color: var(--btn-text);
+            border-color: var(--accent);
+        }
+
+        
+        .fab-container {
+            transform: translateY(120%);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fab-container.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .fab-btn {
+            box-shadow: 0 10px 30px var(--glow-color);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fab-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 15px var(--glow-color);
+        }
+
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-item {
+            opacity: 0;
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+    </style>
+</head>
+<body class="theme-night" vid="10">
+
+    <div class="device-frame" vid="11">
+        
+        
+        <div class="ambient-layer" vid="12">
+            <div class="ambient-orb" vid="13"></div>
+            <div class="ambient-orb" vid="14"></div>
+        </div>
+
+        <div class="content-layer" vid="15">
+            
+            
+            <div class="px-6 flex flex-col z-20" vid="16">
+                
+                <header class="flex justify-between items-center mb-6" vid="17">
+                    <button id="filter-toggle" class="w-12 h-12 flex items-center justify-center rounded-2xl theme-bg-surface active:scale-95 transition-transform" vid="18">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6 theme-stroke-accent" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="19">
+                            <line x1="4" y1="21" x2="4" y2="14" vid="20"></line>
+                            <line x1="4" y1="10" x2="4" y2="3" vid="21"></line>
+                            <line x1="12" y1="21" x2="12" y2="12" vid="22"></line>
+                            <line x1="12" y1="8" x2="12" y2="3" vid="23"></line>
+                            <line x1="20" y1="21" x2="20" y2="16" vid="24"></line>
+                            <line x1="20" y1="12" x2="20" y2="3" vid="25"></line>
+                            <line x1="1" y1="14" x2="7" y2="14" vid="26"></line>
+                            <line x1="9" y1="8" x2="15" y2="8" vid="27"></line>
+                            <line x1="17" y1="16" x2="23" y2="16" vid="28"></line>
+                        </svg>
+                    </button>
+                    <h1 class="text-[20px] font-bold theme-text-main tracking-wide" vid="29">选择菜谱</h1>
+                    <button class="w-12 h-12 flex items-center justify-center rounded-2xl theme-bg-surface active:scale-95 transition-transform" vid="30">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6 theme-stroke-main" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="31">
+                            <circle cx="12" cy="12" r="10" vid="32"></circle>
+                            <polyline points="12 6 12 12 16 14" vid="33"></polyline>
+                        </svg>
+                    </button>
+                </header>
+
+                
+                <div class="relative mb-6" vid="34">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none" vid="35">
+                        <svg viewBox="0 0 24 24" class="w-5 h-5 theme-stroke-muted" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="36">
+                            <circle cx="11" cy="11" r="8" vid="37"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" vid="38"></line>
+                        </svg>
+                    </div>
+                    <input type="text" placeholder="搜索菜谱、食材或标签" class="w-full theme-bg-surface theme-text-main placeholder:text-[var(--text-muted)] rounded-[100px] py-4 pl-12 pr-6 text-[15px] font-medium outline-none transition-colors duration-[2s]" vid="39">
+                </div>
+
+                
+                <div id="filter-panel" class="filter-panel" vid="40">
+                    <div class="theme-bg-surface rounded-3xl p-5 space-y-5" vid="41">
+                        
+                        <div vid="42">
+                            <h3 class="text-[13px] font-bold theme-text-main mb-3" vid="43">烹饪难度</h3>
+                            <div class="flex flex-wrap gap-2" vid="44">
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="45">新手友好</button>
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="46">进阶挑战</button>
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="47">大厨级别</button>
+                            </div>
+                        </div>
+                        
+                        <div vid="48">
+                            <h3 class="text-[13px] font-bold theme-text-main mb-3" vid="49">菜谱标签</h3>
+                            <div class="flex flex-wrap gap-2" vid="50">
+                                <button class="filter-chip active px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="51">快手菜</button>
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="52">减脂</button>
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="53">高蛋白</button>
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="54">汤羹</button>
+                            </div>
+                        </div>
+                        
+                        <div vid="55">
+                            <h3 class="text-[13px] font-bold theme-text-main mb-3" vid="56">所需厨具</h3>
+                            <div class="flex flex-wrap gap-2" vid="57">
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="58">烤箱</button>
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="59">空气炸锅</button>
+                                <button class="filter-chip px-4 py-2 rounded-[100px] theme-bg-base border theme-border-surface text-[13px] font-semibold theme-text-muted" vid="60">微波炉</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 space-y-4" vid="61">
+                
+                
+                <div class="recipe-card theme-bg-surface rounded-3xl p-4 flex gap-4 cursor-pointer animate-item" style="animation-delay: 0.1s" onclick="toggleSelect(this)" vid="62">
+                    <div class="flex-1 flex flex-col justify-between" vid="63">
+                        <div vid="64">
+                            <h2 class="text-[18px] font-bold theme-text-main mb-1 leading-tight" vid="65">迷迭香煎牛排</h2>
+                            <p class="text-[13px] theme-text-muted line-clamp-1 mb-3" vid="66">外焦里嫩，肉汁饱满的经典西餐</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2" vid="67">
+                            <span class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-accent" vid="68">
+                                <svg viewBox="0 0 24 24" class="w-3 h-3 theme-stroke-accent" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="69"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" vid="70"></polygon></svg>
+                                进阶
+                            </span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="71">牛排</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="72">平底锅</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative w-[90px] h-[90px] flex-shrink-0" vid="73">
+                        <img src="https://images.unsplash.com/photo-1546964124-0cce460f38ef?auto=format&amp;fit=crop&amp;q=80&amp;w=200&amp;h=200" alt="牛排" class="w-full h-full object-cover rounded-2xl shadow-sm" vid="74">
+                        
+                        <div class="check-icon absolute -top-2 -right-2 w-7 h-7 theme-bg-accent rounded-full flex items-center justify-center border-2 theme-border-surface z-10" vid="75">
+                            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="var(--btn-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vid="76"><polyline points="20 6 9 17 4 12" vid="77"></polyline></svg>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="recipe-card theme-bg-surface rounded-3xl p-4 flex gap-4 cursor-pointer animate-item" style="animation-delay: 0.2s" onclick="toggleSelect(this)" vid="78">
+                    <div class="flex-1 flex flex-col justify-between" vid="79">
+                        <div vid="80">
+                            <h2 class="text-[18px] font-bold theme-text-main mb-1 leading-tight" vid="81">清炒时蔬</h2>
+                            <p class="text-[13px] theme-text-muted line-clamp-1 mb-3" vid="82">低脂健康，三分钟出锅的快手菜</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2" vid="83">
+                            <span class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="84">
+                                <svg viewBox="0 0 24 24" class="w-3 h-3 theme-stroke-muted" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="85"><circle cx="12" cy="12" r="10" vid="86"></circle><polyline points="12 6 12 12 16 14" vid="87"></polyline></svg>
+                                5分钟
+                            </span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="88">蔬菜</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="89">炒锅</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="90">减脂</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative w-[90px] h-[90px] flex-shrink-0 theme-bg-base rounded-2xl flex items-center justify-center border border-[var(--bg-surface)]" vid="91">
+                        <svg viewBox="0 0 24 24" class="w-8 h-8 theme-stroke-muted opacity-50" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vid="92">
+                            <path d="M4 14C4 18.4183 7.58172 22 12 22C16.4183 22 20 18.4183 20 14" vid="93"></path>
+                            <path d="M12 2L12 8" vid="94"></path>
+                            <path d="M8 4L8 8" vid="95"></path>
+                            <path d="M16 4L16 8" vid="96"></path>
+                            <path d="M2 14H22" vid="97"></path>
+                        </svg>
+                        
+                        <div class="check-icon absolute -top-2 -right-2 w-7 h-7 theme-bg-accent rounded-full flex items-center justify-center border-2 theme-border-surface z-10" vid="98">
+                            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="var(--btn-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vid="99"><polyline points="20 6 9 17 4 12" vid="100"></polyline></svg>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="recipe-card theme-bg-surface rounded-3xl p-4 flex gap-4 cursor-pointer animate-item" style="animation-delay: 0.3s" onclick="toggleSelect(this)" vid="101">
+                    <div class="flex-1 flex flex-col justify-between" vid="102">
+                        <div vid="103">
+                            <h2 class="text-[18px] font-bold theme-text-main mb-1 leading-tight" vid="104">法式烤春鸡</h2>
+                            <p class="text-[13px] theme-text-muted line-clamp-1 mb-3" vid="105">香草腌制，表皮酥脆内部多汁</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2" vid="106">
+                            <span class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-accent" vid="107">
+                                <svg viewBox="0 0 24 24" class="w-3 h-3 theme-stroke-accent" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="108"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" vid="109"></polygon></svg>
+                                大厨
+                            </span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="110">整鸡</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="111">烤箱</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative w-[90px] h-[90px] flex-shrink-0" vid="112">
+                        <img src="https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?auto=format&amp;fit=crop&amp;q=80&amp;w=200&amp;h=200" alt="烤鸡" class="w-full h-full object-cover rounded-2xl shadow-sm" vid="113">
+                        
+                        <div class="check-icon absolute -top-2 -right-2 w-7 h-7 theme-bg-accent rounded-full flex items-center justify-center border-2 theme-border-surface z-10" vid="114">
+                            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="var(--btn-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vid="115"><polyline points="20 6 9 17 4 12" vid="116"></polyline></svg>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="recipe-card theme-bg-surface rounded-3xl p-4 flex gap-4 cursor-pointer animate-item" style="animation-delay: 0.4s" onclick="toggleSelect(this)" vid="117">
+                    <div class="flex-1 flex flex-col justify-between" vid="118">
+                        <div vid="119">
+                            <h2 class="text-[18px] font-bold theme-text-main mb-1 leading-tight" vid="120">鲜虾牛油果沙拉</h2>
+                            <p class="text-[13px] theme-text-muted line-clamp-1 mb-3" vid="121">清爽解腻，高颜值轻食首选</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2" vid="122">
+                            <span class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="123">
+                                <svg viewBox="0 0 24 24" class="w-3 h-3 theme-stroke-muted" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="124"><circle cx="12" cy="12" r="10" vid="125"></circle><polyline points="12 6 12 12 16 14" vid="126"></polyline></svg>
+                                10分钟
+                            </span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="127">鲜虾</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="128">无火</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="129">高蛋白</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative w-[90px] h-[90px] flex-shrink-0" vid="130">
+                        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&amp;fit=crop&amp;q=80&amp;w=200&amp;h=200" alt="沙拉" class="w-full h-full object-cover rounded-2xl shadow-sm" vid="131">
+                        
+                        <div class="check-icon absolute -top-2 -right-2 w-7 h-7 theme-bg-accent rounded-full flex items-center justify-center border-2 theme-border-surface z-10" vid="132">
+                            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="var(--btn-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vid="133"><polyline points="20 6 9 17 4 12" vid="134"></polyline></svg>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="recipe-card theme-bg-surface rounded-3xl p-4 flex gap-4 cursor-pointer animate-item" style="animation-delay: 0.5s" onclick="toggleSelect(this)" vid="135">
+                    <div class="flex-1 flex flex-col justify-between" vid="136">
+                        <div vid="137">
+                            <h2 class="text-[18px] font-bold theme-text-main mb-1 leading-tight" vid="138">番茄土豆炖牛腩</h2>
+                            <p class="text-[13px] theme-text-muted line-clamp-1 mb-3" vid="139">酸甜浓郁，超级下饭的家庭常备菜</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2" vid="140">
+                            <span class="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="141">
+                                <svg viewBox="0 0 24 24" class="w-3 h-3 theme-stroke-muted" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="142"><circle cx="12" cy="12" r="10" vid="143"></circle><polyline points="12 6 12 12 16 14" vid="144"></polyline></svg>
+                                60分钟
+                            </span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="145">牛肉</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="146">炖锅</span>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md theme-bg-base theme-text-muted" vid="147">汤羹</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative w-[90px] h-[90px] flex-shrink-0" vid="148">
+                        <img src="https://images.unsplash.com/photo-1548943487-a2e4f43b4850?auto=format&amp;fit=crop&amp;q=80&amp;w=200&amp;h=200" alt="炖肉" class="w-full h-full object-cover rounded-2xl shadow-sm" vid="149">
+                        
+                        <div class="check-icon absolute -top-2 -right-2 w-7 h-7 theme-bg-accent rounded-full flex items-center justify-center border-2 theme-border-surface z-10" vid="150">
+                            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="var(--btn-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" vid="151"><polyline points="20 6 9 17 4 12" vid="152"></polyline></svg>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="h-10" vid="153"></div>
+            </div>
+
+            
+            <div id="fab-container" class="fab-container absolute bottom-8 left-0 w-full px-6 z-50 pointer-events-none" vid="154">
+                <button class="fab-btn w-full flex items-center justify-center gap-3 py-[22px] px-6 theme-bg-accent text-[var(--btn-text)] border-none rounded-[100px] text-[18px] font-bold outline-none pointer-events-auto" vid="155">
+                    <span id="fab-text" vid="156">开启烹饪之旅 (1)</span>
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vid="157">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" vid="158"></path>
+                    </svg>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script vid="159">
+        
+        function updateTimeAndTheme() {
+            const now = new Date();
+            const hours = now.getHours();
+            
+            const body = document.body;
+            let currentTheme = '';
+
+            if (hours >= 6 && hours < 12) {
+                currentTheme = 'theme-morning';
+            } else if (hours >= 12 && hours < 17) {
+                currentTheme = 'theme-noon';
+            } else if (hours >= 17 && hours < 20) {
+                currentTheme = 'theme-evening';
+            } else {
+                currentTheme = 'theme-night';
+            }
+
+            if (!body.classList.contains(currentTheme)) {
+                body.className = currentTheme;
+            }
+        }
+
+        updateTimeAndTheme();
+        setInterval(updateTimeAndTheme, 60000);
+
+        
+        const filterToggleBtn = document.getElementById('filter-toggle');
+        const filterPanel = document.getElementById('filter-panel');
+        
+        filterToggleBtn.addEventListener('click', () => {
+            filterPanel.classList.toggle('open');
+            
+            const icon = filterToggleBtn.querySelector('svg');
+            if(filterPanel.classList.contains('open')) {
+                filterToggleBtn.classList.remove('theme-bg-surface');
+                filterToggleBtn.classList.add('theme-bg-accent');
+                icon.classList.remove('theme-stroke-accent');
+                icon.style.stroke = 'var(--btn-text)';
+            } else {
+                filterToggleBtn.classList.add('theme-bg-surface');
+                filterToggleBtn.classList.remove('theme-bg-accent');
+                icon.classList.add('theme-stroke-accent');
+                icon.style.stroke = '';
+            }
+        });
+
+        
+        const filterChips = document.querySelectorAll('.filter-chip');
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                e.target.classList.toggle('active');
+            });
+        });
+
+        
+        let selectedCount = 0;
+        const fabContainer = document.getElementById('fab-container');
+        const fabText = document.getElementById('fab-text');
+
+        function toggleSelect(element) {
+            element.classList.toggle('selected');
+            
+            if (element.classList.contains('selected')) {
+                selectedCount++;
+            } else {
+                selectedCount--;
+            }
+
+            updateFAB();
+        }
+
+        function updateFAB() {
+            if (selectedCount > 0) {
+                fabContainer.classList.add('visible');
+                fabText.textContent = `开始烹饪 (${selectedCount})`;
+            } else {
+                fabContainer.classList.remove('visible');
+            }
+        }
+    </script>
+
+</body></html>
