@@ -3,6 +3,8 @@ import "~/assets/css/homepage-fonts.css";
 
 import { useHomepageTheme } from "../composables/useHomepageTheme";
 
+const HOMEPAGE_LEAVE_DURATION_MS = 560;
+
 defineOptions({
   name: "HomepageEntryPage",
 });
@@ -14,10 +16,34 @@ useSeoMeta({
 
 // todo: 这里做seo适配，放弃随时间段切换文案，实现纯后端SSR
 const { themeState } = useHomepageTheme();
+const isLeaving = ref(false);
+
+function prefersReducedMotion() {
+  if (!import.meta.client) {
+    return true;
+  }
+
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+onBeforeRouteLeave(async () => {
+  if (isLeaving.value || prefersReducedMotion()) {
+    return;
+  }
+
+  isLeaving.value = true;
+
+  await new Promise((resolve) => {
+    window.setTimeout(resolve, HOMEPAGE_LEAVE_DURATION_MS);
+  });
+});
 </script>
 
 <template>
-  <main class="homepage-entry">
+  <main
+    class="homepage-entry"
+    :class="{ 'homepage-entry--leaving': isLeaving }"
+  >
     <div class="homepage-entry__content">
       <header class="homepage-entry__status">
         <div class="homepage-entry__status-pill">
@@ -46,7 +72,7 @@ const { themeState } = useHomepageTheme();
 
       <footer class="homepage-entry__action">
         <NuxtLink
-          to="/recipes"
+          to="/main/select-recipes"
           class="homepage-entry__cta"
         >
           <span>开启灵感</span>
@@ -69,6 +95,10 @@ const { themeState } = useHomepageTheme();
   overflow: hidden;
   font-family: "Quicksand", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   transition: color 320ms ease;
+}
+
+.homepage-entry--leaving {
+  pointer-events: none;
 }
 
 .homepage-entry__content {
@@ -257,6 +287,49 @@ const { themeState } = useHomepageTheme();
   outline-offset: 3px;
 }
 
+.homepage-entry--leaving .homepage-entry__status,
+.homepage-entry--leaving .homepage-entry__logo,
+.homepage-entry--leaving .homepage-entry__eyebrow,
+.homepage-entry--leaving .homepage-entry__brand,
+.homepage-entry--leaving .homepage-entry__welcome,
+.homepage-entry--leaving .homepage-entry__action,
+.homepage-entry--leaving .homepage-entry__status-dot {
+  animation-play-state: paused;
+}
+
+.homepage-entry--leaving .homepage-entry__status {
+  animation: homepage-leave-up 240ms cubic-bezier(0.4, 0, 0.2, 1) 80ms both;
+}
+
+.homepage-entry--leaving .homepage-entry__logo {
+  animation: homepage-leave-up 280ms cubic-bezier(0.4, 0, 0.2, 1) 140ms both;
+}
+
+.homepage-entry--leaving .homepage-entry__eyebrow {
+  animation: homepage-leave-up 260ms cubic-bezier(0.4, 0, 0.2, 1) 190ms both;
+}
+
+.homepage-entry--leaving .homepage-entry__brand {
+  animation: homepage-leave-up 320ms cubic-bezier(0.4, 0, 0.2, 1) 240ms both;
+}
+
+.homepage-entry--leaving .homepage-entry__welcome {
+  animation: homepage-leave-up 280ms cubic-bezier(0.4, 0, 0.2, 1) 290ms both;
+}
+
+.homepage-entry--leaving .homepage-entry__action {
+  animation: homepage-leave-up 240ms cubic-bezier(0.4, 0, 0.2, 1) 340ms both;
+}
+
+.homepage-entry--leaving .homepage-entry__cta {
+  transform: translateY(-0.3rem) scale(0.985);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--app-theme-glow) 80%, transparent);
+}
+
+.homepage-entry--leaving .homepage-entry__cta svg {
+  transform: translateX(0.28rem);
+}
+
 @media (hover: hover) {
   .homepage-entry__cta:hover {
     transform: translateY(-2px);
@@ -305,6 +378,18 @@ const { themeState } = useHomepageTheme();
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes homepage-leave-up {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-1rem);
   }
 }
 

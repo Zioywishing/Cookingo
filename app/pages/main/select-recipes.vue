@@ -1,5 +1,6 @@
 <template>
     <div>
+        select-recipe
     </div>
 </template>
 

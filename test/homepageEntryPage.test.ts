@@ -19,7 +19,7 @@ describe("homepage entry page", () => {
     expect(page).toContain('class="homepage-entry__welcome"');
     expect(page).toContain("{{ themeState.currentTimeLabel }}");
     expect(page).toContain("开启灵感");
-    expect(page).toContain('to="/recipes"');
+    expect(page).toContain('to="/main/select-recipes"');
   });
 
   test("keeps theme transitions on layout and homepage consumer classes", () => {
@@ -32,5 +32,20 @@ describe("homepage entry page", () => {
     expect(page).toContain("transition:");
     expect(page).toContain("color");
     expect(page).toContain("stroke");
+  });
+
+  test("adds a staggered route-leave animation for homepage elements", () => {
+    const page = readProjectFile("app/pages/index.vue");
+
+    expect(page).toContain("onBeforeRouteLeave");
+    expect(page).toContain("homepage-entry--leaving");
+    expect(page).toContain("homepage-leave-up");
+    expect(page).toContain("animation-play-state: paused");
+    expect(page).toContain("both;");
+    expect(page).toContain("homepage-entry__status {\n  animation: homepage-leave-up 240ms cubic-bezier(0.4, 0, 0.2, 1) 80ms both;");
+    expect(page).toContain("homepage-entry__logo {\n  animation: homepage-leave-up 280ms cubic-bezier(0.4, 0, 0.2, 1) 140ms both;");
+    expect(page).toContain("homepage-entry__welcome {\n  animation: homepage-leave-up 280ms cubic-bezier(0.4, 0, 0.2, 1) 290ms both;");
+    expect(page).toContain("homepage-entry__action {\n  animation: homepage-leave-up 240ms cubic-bezier(0.4, 0, 0.2, 1) 340ms both;");
+    expect(page).toContain("prefers-reduced-motion: reduce");
   });
 });
